@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hikmah — حكمة | Authentic Islamic Knowledge</title>
+    <meta name="description"
+        content="Hikmah: A multi-agent AI system grounded in Sahih evidence for authentic Islamic knowledge, serving Japanese, Italian, German, and Arabic speakers.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        parchment: '#F5F0E8',
+                        'parchment-dark': '#E8DFD0',
+                        ink: '#2C1810',
+                        'ink-light': '#5C4033',
+                        gold: '#C4993D',
+                        'gold-dark': '#A67C2E',
+                        'gold-light': '#E8D5A3',
+                        emerald: '#1B6B4A',
+                        'emerald-dark': '#0F4A32',
+                        crimson: '#8B1A1A',
+                        azure: '#1E3A5F',
+                    },
+                    fontFamily: {
+                        serif: ['Amiri', 'Georgia', 'serif'],
+                        arabic: ['Amiri', 'Traditional Arabic', 'serif'],
+                        display: ['Cinzel', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(160deg, #F5F0E8 0%, #E8DFD0 50%, #F5F0E8 100%);
+            min-height: 100vh;
+        }
+
+        /* Geometric border pattern */
+        .geo-border {
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(196, 153, 61, 0.08) 10px, rgba(196, 153, 61, 0.08) 20px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(196, 153, 61, 0.08) 10px, rgba(196, 153, 61, 0.08) 20px);
+        }
+
+        /* Manuscript paper effect */
+        .manuscript-card {
+            background:
+                linear-gradient(180deg, rgba(245, 240, 232, 0.95) 0%, rgba(232, 223, 208, 0.9) 100%);
+            box-shadow:
+                0 1px 3px rgba(44, 24, 16, 0.08),
+                0 8px 24px rgba(44, 24, 16, 0.06),
+                inset 0 0 80px rgba(196, 153, 61, 0.04);
+        }
+
+        /* Gold divider */
+        .gold-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #C4993D 30%, #E8D5A3 50%, #C4993D 70%, transparent 100%);
+        }
+
+        /* Animated glow */
+        @keyframes softPulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .pulse-glow {
+            animation: softPulse 2.5s ease-in-out infinite;
+        }
+
+        /* RTL for Arabic sections */
+        [dir="rtl"],
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* Score ring animation */
+        @keyframes scoreReveal {
+            from {
+                stroke-dashoffset: 251;
+            }
+        }
+
+        .score-ring {
+            animation: scoreReveal 1.2s ease-out forwards;
+        }
+
+        /* Fade in */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+
+        /* Loading dots */
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60%,
+            100% {
+                content: '...';
+            }
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(1) infinite;
+        }
+
+        /* Fallback red glow */
+        .fallback-glow {
+            box-shadow: 0 0 30px rgba(139, 26, 26, 0.15), inset 0 0 30px rgba(139, 26, 26, 0.05);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #C4993D;
+            border-radius: 3px;
+        }
+
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(196, 153, 61, 0.4);
+        }
+    </style>
+</head>
+
+<body class="font-serif text-ink antialiased">
+
+    <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+    <header class="relative py-8 text-center geo-border">
+        <div class="max-w-3xl mx-auto px-4">
+            <!-- Arabesque top ornament -->
+            <div class="text-gold text-3xl tracking-[0.5em] opacity-60 mb-3">❋ ❋ ❋</div>
+
+            <h1 class="font-display text-4xl md:text-5xl font-bold tracking-wider text-ink mb-2">
+                HIKMAH
+            </h1>
+            <p class="font-arabic text-2xl text-gold-dark mb-3" dir="rtl">حِكْمَة</p>
+            <p class="text-ink-light text-sm tracking-widest uppercase">
+                Authentic Islamic Knowledge · Multi-Agent RAG
+            </p>
+
+            <div class="gold-divider mt-6 mx-auto max-w-xs"></div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+    <main class="max-w-3xl mx-auto px-4 py-8">
+
+        <!-- Search Card -->
+        <section id="search-section" class="manuscript-card rounded-xl p-6 md:p-8 mb-8">
+            <label for="query-input" class="block text-xs tracking-widest uppercase text-ink-light mb-3">
+                Ask in any language · 日本語 · Deutsch · Italiano · العربية
+            </label>
+
+            <div class="relative">
+                <textarea id="query-input" rows="3"
+                    placeholder="断食の条件は何ですか？ / Was sind die Bedingungen des Fastens? / ما شروط الصيام؟" class="w-full bg-parchment/60 border border-gold-light/60 rounded-lg px-4 py-3
+                           font-serif text-ink placeholder:text-ink-light/40 resize-none
+                           transition-all duration-300"></textarea>
+            </div>
+
+            <div class="flex items-center justify-between mt-4">
+                <p class="text-xs text-ink-light/60 hidden md:block">
+                    ⌘ Grounded in Sahih al-Bukhari · Sahih Muslim · Fath al-Bari
+                </p>
+                <button id="ask-btn" onclick="submitQuery()" class="bg-emerald hover:bg-emerald-dark text-parchment font-display text-sm
+                           tracking-wider px-8 py-2.5 rounded-lg transition-all duration-300
+                           hover:shadow-lg hover:shadow-emerald/20 active:scale-[0.98]">
+                    SEEK KNOWLEDGE
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section id="loading-section" class="hidden manuscript-card rounded-xl p-8 mb-8 text-center fade-in">
+            <div class="inline-flex items-center gap-3 text-gold-dark">
+                <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.3" />
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <span class="font-display text-sm tracking-wider loading-dots">
+                    The Council of Agents is deliberating
+                </span>
+            </div>
+            <div class="mt-4 text-xs text-ink-light/50 space-y-1">
+                <p id="stage-text">🕵️ Polyglot Translator — detecting language…</p>
+            </div>
+        </section>
+
+        <!-- ═══════════ RESULT (Success) ═══════════ -->
+        <section id="result-section" class="hidden fade-in">
+
+            <!-- Amanah Score -->
+            <div class="manuscript-card rounded-xl p-6 mb-6 flex items-center gap-6">
+                <div class="relative w-20 h-20 flex-shrink-0">
+                    <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#E8D5A3" stroke-width="6" />
+                        <circle id="score-circle" cx="50" cy="50" r="40" fill="none" stroke="#1B6B4A" stroke-width="6"
+                            stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251" class="score-ring" />
+                    </svg>
+                    <span id="score-value"
+                        class="absolute inset-0 flex items-center justify-center font-display text-lg font-bold text-emerald">
+                        —
+                    </span>
+                </div>
+                <div>
+                    <h3 class="font-display text-sm tracking-wider text-ink-light uppercase">Amanah Score</h3>
+                    <p id="score-label" class="text-xs text-ink-light/60 mt-1">Integrity Assessment</p>
+                </div>
+                <div class="ml-auto text-right">
+                    <span id="lang-badge" class="inline-block bg-gold-light/40 text-gold-dark text-xs font-display
+                           tracking-wider px-3 py-1 rounded-full"></span>
+                </div>
+            </div>
+
+            <!-- Answer Card -->
+            <div class="manuscript-card rounded-xl p-6 md:p-8 mb-6">
+                <h2 class="font-display text-xs tracking-[0.2em] uppercase text-gold-dark mb-4">
+                    Scholarly Answer
+                </h2>
+                <div class="gold-divider mb-5 max-w-[60px]"></div>
+                <div id="answer-text" class="text-ink leading-relaxed whitespace-pre-wrap"></div>
+            </div>
+
+            <!-- Arabic Draft -->
+            <div class="manuscript-card rounded-xl p-6 md:p-8 mb-6" dir="rtl">
+                <h2 class="font-display text-xs tracking-[0.2em] uppercase text-gold-dark mb-4 text-right"
+                    style="direction:ltr; text-align:left;">
+                    Arabic Scholarly Draft · المسودة العلمية
+                </h2>
+                <div class="gold-divider mb-5 max-w-[60px]"></div>
+                <div id="arabic-draft-text" class="font-arabic text-lg text-ink leading-loose whitespace-pre-wrap">
+                </div>
+            </div>
+
+            <!-- Sources -->
+            <div class="manuscript-card rounded-xl p-6 mb-6">
+                <h2 class="font-display text-xs tracking-[0.2em] uppercase text-gold-dark mb-4">
+                    Sources · المصادر
+                </h2>
+                <div class="gold-divider mb-5 max-w-[60px]"></div>
+                <div id="sources-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Verifier Notes -->
+            <details class="manuscript-card rounded-xl p-6 mb-6 group cursor-pointer">
+                <summary class="font-display text-xs tracking-[0.2em] uppercase text-ink-light
+                               flex items-center justify-between list-none">
+                    Verifier Audit Notes
+                    <span class="transition-transform group-open:rotate-180 text-gold">▾</span>
+                </summary>
+                <div class="gold-divider my-4 max-w-[60px]"></div>
+                <p id="verifier-notes"
+                    class="font-arabic text-sm text-ink-light leading-relaxed rtl whitespace-pre-wrap"></p>
+            </details>
+        </section>
+
+        <!-- ═══════════ FALLBACK (Wallahu Alam) ═══════════ -->
+        <section id="fallback-section" class="hidden fade-in">
+            <div class="manuscript-card fallback-glow rounded-xl p-8 text-center border border-crimson/10">
+                <p class="font-arabic text-3xl text-crimson mb-4" dir="rtl">والله أعلم</p>
+                <div class="gold-divider mx-auto max-w-[100px] mb-5"></div>
+                <p id="fallback-text" class="text-ink-light leading-relaxed max-w-md mx-auto"></p>
+                <div class="mt-6 flex items-center justify-center gap-2 text-xs text-ink-light/50">
+                    <span>Amanah Score:</span>
+                    <span id="fallback-score" class="font-display text-crimson font-bold"></span>
+                    <span>— Below 85% threshold</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error State -->
+        <section id="error-section" class="hidden fade-in">
+            <div class="manuscript-card rounded-xl p-6 text-center border border-crimson/20">
+                <p class="text-crimson font-display text-sm tracking-wider mb-2">Connection Error</p>
+                <p id="error-text" class="text-ink-light text-sm">Unable to reach the Hikmah backend.</p>
+                <button onclick="submitQuery()" class="mt-4 text-gold-dark text-xs font-display tracking-wider
+                                                         hover:text-gold transition-colors">
+                    ↻ RETRY
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+    <footer class="text-center py-8 text-xs text-ink-light/40 tracking-wider">
+        <div class="text-gold/30 text-xl mb-2">❋</div>
+        HIKMAH v0.1 · Multi-Agent RAG · Grounded in Sahih Evidence
+    </footer>
+
+    <!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
+    <script>
+        // ── Configuration ──────────────────────────────────────
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:8000'
+            : 'https://hikmah-backend.onrender.com';  // Update with your Render URL
+
+        // ── DOM refs ───────────────────────────────────────────
+        const $ = (id) => document.getElementById(id);
+        const input = $('query-input');
+        const searchSec = $('search-section');
+        const loadingSec = $('loading-section');
+        const resultSec = $('result-section');
+        const fallbackSec = $('fallback-section');
+        const errorSec = $('error-section');
+        const stageText = $('stage-text');
+
+        // ── Sections visibility ────────────────────────────────
+        function showOnly(sectionId) {
+            [resultSec, fallbackSec, errorSec, loadingSec].forEach(s => s.classList.add('hidden'));
+            if (sectionId) $(sectionId).classList.remove('hidden');
+        }
+
+        // ── Simulated loading stages ───────────────────────────
+        const stages = [
+            '🕵️ Polyglot Translator — detecting language…',
+            '📚 Researcher Agent — querying Sahih database…',
+            '⚖️ Verifier Agent — performing Antigravity Audit…',
+            '🗣️ Global Spokesperson — formatting final answer…',
+        ];
+        let stageTimer;
+        function animateStages() {
+            let i = 0;
+            stageText.textContent = stages[0];
+            stageTimer = setInterval(() => {
+                i = (i + 1) % stages.length;
+                stageText.textContent = stages[i];
+            }, 2800);
+        }
+
+        // ── Language labels ────────────────────────────────────
+        const langLabels = {
+            ja: '日本語 Japanese', de: 'Deutsch German', it: 'Italiano Italian',
+            ar: 'العربية Arabic', en: 'English', fr: 'Français French',
+            ms: 'Bahasa Melayu', id: 'Bahasa Indonesia',
+        };
+
+        // ── Score ring animation ───────────────────────────────
+        function setScoreRing(score) {
+            const circumference = 251;
+            const offset = circumference - (score / 100) * circumference;
+            const circle = $('score-circle');
+            circle.style.strokeDashoffset = circumference;  // reset
+            circle.style.stroke = score >= 85 ? '#1B6B4A' : '#8B1A1A';
+            // Trigger reflow then animate
+            void circle.offsetWidth;
+            circle.style.strokeDashoffset = offset;
+
+            $('score-value').textContent = score;
+            $('score-label').textContent = score >= 90
+                ? 'All claims backed by Sahih'
+                : score >= 85
+                    ? 'Sound with minor gaps'
+                    : 'Below integrity threshold';
+        }
+
+        // ── Submit query ───────────────────────────────────────
+        async function submitQuery() {
+            const query = input.value.trim();
+            if (!query) { input.focus(); return; }
+
+            showOnly('loading-section');
+            animateStages();
+            $('ask-btn').disabled = true;
+
+            try {
+                const resp = await fetch(`${API_BASE}/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query }),
+                });
+
+                clearInterval(stageTimer);
+
+                if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
+                const data = await resp.json();
+
+                if (data.is_fallback) {
+                    // ── Wallahu Alam ──
+                    $('fallback-text').textContent = data.answer;
+                    $('fallback-score').textContent = data.amanah_score;
+                    showOnly('fallback-section');
+                } else {
+                    // ── Success ──
+                    setScoreRing(data.amanah_score);
+                    $('lang-badge').textContent = langLabels[data.source_language] || data.source_language;
+                    $('answer-text').textContent = data.answer;
+                    $('arabic-draft-text').textContent = data.arabic_draft || '';
+                    $('verifier-notes').textContent = data.verification_notes || '';
+
+                    // Sources
+                    const sourcesList = $('sources-list');
+                    sourcesList.innerHTML = '';
+                    if (data.sources && data.sources.length) {
+                        data.sources.forEach(src => {
+                            const div = document.createElement('div');
+                            div.className = 'flex items-start gap-3 text-sm';
+                            div.innerHTML = `
+                                <span class="text-gold mt-0.5 flex-shrink-0">📖</span>
+                                <div>
+                                    <span class="font-display text-xs tracking-wider text-ink-light uppercase">${src.book}</span>
+                                    ${src.hadith_no ? `<span class="text-gold-dark text-xs ml-2">#${src.hadith_no}</span>` : ''}
+                                    ${src.text_snippet ? `<p class="font-arabic text-sm text-ink-light/70 mt-1 rtl" dir="rtl">${src.text_snippet}</p>` : ''}
+                                </div>
+                            `;
+                            sourcesList.appendChild(div);
+                        });
+                    } else {
+                        sourcesList.innerHTML = '<p class="text-xs text-ink-light/40">No explicit source citations returned.</p>';
+                    }
+
+                    showOnly('result-section');
+                }
+            } catch (err) {
+                clearInterval(stageTimer);
+                console.error(err);
+                $('error-text').textContent = err.message || 'Unable to reach the Hikmah backend.';
+                showOnly('error-section');
+            } finally {
+                $('ask-btn').disabled = false;
+            }
+        }
+
+        // ── Enter key shortcut ─────────────────────────────────
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitQuery();
+            }
+        });
+    </script>
+</body>
+
+</html>

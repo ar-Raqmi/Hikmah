@@ -1,0 +1,11 @@
+# Cloudflare Vectorize — Hikmah Sahih Index
+# This config is used by `wrangler` CLI but also documents the index spec.
+# Create the index:  npx wrangler vectorize create hikmah-sahih-index --dimensions=768 --metric=cosine
+
+name = "hikmah-vectorize-worker"
+main = "src/index.ts"
+compatibility_date = "2024-09-01"
+
+[[vectorize]]
+binding = "HIKMAH_INDEX"
+index_name = "hikmah-sahih-index"
