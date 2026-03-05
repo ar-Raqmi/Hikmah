@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .graph import build_graph
 from .schemas import AskRequest, AskResponse, SourceReference
 
-load_dotenv()
+load_dotenv(override=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -79,7 +79,14 @@ async def ask(req: AskRequest):
         result = graph.invoke({"original_query": req.query})
     except Exception as exc:
         logger.exception("Pipeline error")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        # Surface Gemini / OpenAI quota/rate-limit errors as 429 instead of 500
+        err_str = str(exc)
+        if "429" in err_str or "quota" in err_str.lower() or "rate" in err_str.lower():
+            raise HTTPException(
+                status_code=429,
+                detail="API rate limit reached. Please wait a moment and try again.",
+            ) from exc
+        raise HTTPException(status_code=500, detail=err_str) from exc
 
     amanah_score = result.get("amanah_score", 0)
     is_fallback = amanah_score < 85

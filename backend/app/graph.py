@@ -21,6 +21,12 @@ import re
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
+
+try:
+    from langchain_groq import ChatGroq
+    _GROQ_AVAILABLE = True
+except ImportError:
+    _GROQ_AVAILABLE = False
 from langgraph.graph import END, StateGraph
 
 from .schemas import HikmahState
@@ -28,31 +34,99 @@ from .vectorize import VectorizeClient
 
 logger = logging.getLogger("hikmah.graph")
 
+
+# ---------------------------------------------------------------------------
+# JSON parsing helper — handles LLM output quirks
+# ---------------------------------------------------------------------------
+
+def _parse_json_response(raw: str) -> dict:
+    """Extract JSON from an LLM response, tolerating markdown fences and preamble."""
+    text = raw.strip()
+    # Strip ```json ... ``` fences
+    text = re.sub(r"^```(?:json)?\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    # Try to find JSON object in the text
+    match = re.search(r"\{[\s\S]*\}", text)
+    if match:
+        try:
+            return json.loads(match.group())
+        except json.JSONDecodeError:
+            pass
+    logger.error("Failed to parse JSON from LLM response: %s", text[:200])
+    raise ValueError(f"Could not extract valid JSON from LLM response: {text[:200]}")
+
+
 # ---------------------------------------------------------------------------
 # LLM singletons (initialised lazily via env vars)
 # ---------------------------------------------------------------------------
 
 _gemini: ChatGoogleGenerativeAI | None = None
 _gpt4o: ChatOpenAI | None = None
+_groq: "ChatGroq | None" = None
 
 
-def _get_gemini() -> ChatGoogleGenerativeAI:
+def _get_api_key(key_name: str) -> str:
+    from dotenv import dotenv_values
+    env_dict = dotenv_values(".env")
+    return env_dict.get(key_name, "").strip()
+
+def _get_gemini() -> ChatGoogleGenerativeAI | None:
+    """Return Gemini client if GOOGLE_API_KEY is set, else None."""
     global _gemini
+    api_key = _get_api_key("GOOGLE_API_KEY")
+    if not api_key:
+        return None
     if _gemini is None:
         _gemini = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
-            google_api_key=os.environ["GOOGLE_API_KEY"],
+            model="gemini-2.0-flash",
+            google_api_key=api_key,
             temperature=0.2,
         )
     return _gemini
 
+def _get_groq():
+    """Return Groq (Llama 3.3 70B) client if GROQ_API_KEY is set, else None."""
+    global _groq
+    if not _GROQ_AVAILABLE:
+        return None
+    api_key = _get_api_key("GROQ_API_KEY")
+    if not api_key:
+        return None
+    if _groq is None:
+        _groq = ChatGroq(  # type: ignore[assignment]
+            model="llama-3.3-70b-versatile",
+            api_key=api_key,
+            temperature=0.2,
+        )
+    return _groq
 
-def _get_gpt4o() -> ChatOpenAI:
+
+def _get_primary_llm():
+    """Return the best available LLM: Gemini → Groq (fallback)."""
+    llm = _get_gemini() or _get_groq()
+    if llm is None:
+        raise RuntimeError(
+            "No LLM configured. Set GOOGLE_API_KEY (Gemini) or GROQ_API_KEY (Groq) in .env"
+        )
+    logger.info("Using LLM provider: %s", llm.__class__.__name__)
+    return llm
+
+
+def _get_gpt4o() -> ChatOpenAI | None:
+    """Return GPT-4o client if OPENAI_API_KEY is set, else None."""
     global _gpt4o
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        return None
     if _gpt4o is None:
         _gpt4o = ChatOpenAI(
             model="gpt-4o",
-            api_key=os.environ["OPENAI_API_KEY"],
+            api_key=api_key,
             temperature=0.0,
         )
     return _gpt4o
@@ -95,7 +169,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 
 def polyglot_translator(state: HikmahState) -> dict:
     """Detect language and produce scholarly Arabic query."""
-    llm = _get_gemini()
+    llm = _get_primary_llm()
     query = state["original_query"]
 
     response = llm.invoke([
@@ -103,12 +177,7 @@ def polyglot_translator(state: HikmahState) -> dict:
         HumanMessage(content=query),
     ])
 
-    raw = response.content.strip()
-    # Strip markdown fences if the model wraps in ```json ... ```
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-
-    parsed = json.loads(raw)
+    parsed = _parse_json_response(response.content)
     return {
         "input_language": parsed["language"],
         "arabic_query": parsed["arabic_query"],
@@ -120,8 +189,11 @@ def polyglot_translator(state: HikmahState) -> dict:
 # ---------------------------------------------------------------------------
 
 RESEARCHER_SYSTEM = """\
-You are an evidence-first Islamic researcher. You have been given authentic
-hadith chunks retrieved from a scholarly database.
+You are an evidence-first Islamic researcher.
+
+You may receive hadith chunks retrieved from a scholarly database. If chunks
+are provided, use them as primary evidence. If NO chunks are available, draw
+from your trained knowledge of authentic (Sahih) hadith collections.
 
 Rules:
 - Cite ONLY Sahih (authentic) hadith — Bukhari, Muslim, or major scholarly
@@ -136,40 +208,48 @@ Rules:
 
 
 def researcher_agent(state: HikmahState) -> dict:
-    """Search Vectorize and draft Dalil-First Arabic answer."""
-    llm = _get_gemini()
+    """Search Vectorize (if available) and draft Dalil-First Arabic answer."""
+    llm = _get_primary_llm()
     arabic_q = state["arabic_query"]
+
+    # --- Try Vectorize if credentials are set ---
+    chunks: list[dict] = []
     vc = _get_vectorize()
+    if vc._account_id and vc._api_token:
+        try:
+            import google.generativeai as genai
 
-    # --- Embed the Arabic query ---
-    import google.generativeai as genai
+            genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+            embed_result = genai.embed_content(
+                model="models/text-embedding-004",
+                content=arabic_q,
+                task_type="retrieval_query",
+            )
+            query_vector = embed_result["embedding"]
+            chunks = vc.query(vector=query_vector, top_k=5)
+        except Exception as exc:
+            logger.warning("Vectorize query failed, continuing without RAG: %s", exc)
 
-    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
-    embed_result = genai.embed_content(
-        model="models/text-embedding-004",
-        content=arabic_q,
-        task_type="retrieval_query",
-    )
-    query_vector = embed_result["embedding"]
-
-    # --- Query Vectorize ---
-    chunks = vc.query(vector=query_vector, top_k=5)
-
-    context_block = "\n\n---\n\n".join(
-        f"[{c.get('book', 'مصدر')}  #{c.get('hadith_no', '')}]\n{c.get('text', '')}"
-        for c in chunks
-    ) or "لا توجد نتائج"
+    if chunks:
+        context_block = "\n\n---\n\n".join(
+            f"[{c.get('book', 'مصدر')}  #{c.get('hadith_no', '')}]\n{c.get('text', '')}"
+            for c in chunks
+        )
+        user_msg = f"السؤال: {arabic_q}\n\nالنصوص المسترجعة:\n{context_block}"
+    else:
+        logger.info("No Vectorize results — using LLM built-in knowledge")
+        user_msg = (
+            f"السؤال: {arabic_q}\n\n"
+            "لا توجد نصوص مسترجعة من قاعدة البيانات. "
+            "استخدم معرفتك بالأحاديث الصحيحة من البخاري ومسلم وفتح الباري."
+        )
 
     response = llm.invoke([
         SystemMessage(content=RESEARCHER_SYSTEM),
-        HumanMessage(content=f"السؤال: {arabic_q}\n\nالنصوص المسترجعة:\n{context_block}"),
+        HumanMessage(content=user_msg),
     ])
 
-    raw = response.content.strip()
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-
-    parsed = json.loads(raw)
+    parsed = _parse_json_response(response.content)
     return {
         "authentic_chunks": parsed.get("sources", []),
         "arabic_scholarly_draft": parsed["draft"],
@@ -205,8 +285,11 @@ Scoring guide:
 
 
 def verifier_agent(state: HikmahState) -> dict:
-    """GPT-4o strict audit. Returns amanah_score 0-100."""
-    llm = _get_gpt4o()
+    """Antigravity Audit. Uses GPT-4o if available, otherwise best available LLM."""
+    # Prefer GPT-4o for verification rigour, fall back to Gemini/Groq
+    llm = _get_gpt4o() or _get_primary_llm()
+    logger.info("Verifier using: %s", llm.__class__.__name__)
+
     draft = state["arabic_scholarly_draft"]
     chunks = state.get("authentic_chunks", [])
 
@@ -222,11 +305,7 @@ def verifier_agent(state: HikmahState) -> dict:
         ),
     ])
 
-    raw = response.content.strip()
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-
-    parsed = json.loads(raw)
+    parsed = _parse_json_response(response.content)
     return {
         "amanah_score": int(parsed["amanah_score"]),
         "verification_notes": parsed.get("notes", ""),
@@ -248,15 +327,35 @@ Your job:
 1. Translate the Arabic draft into the user's language with scholarly dignity.
 2. Preserve all hadith citations (book + number) in their original Arabic form.
 3. Keep the tone accessible yet respectful.
-4. Format the answer with clear sections: Evidence, Explanation, Source.
+4. Format the answer with clear Markdown sections using ## headings:
 
-Return the final answer as plain text (not JSON). Use the user's language.
+## Evidence
+Present the primary hadith or Qur'anic evidence. Always include the original Arabic text of the hadith/ayah.
+Mention the source grading when known (e.g. **Sahih** — Authentic, **Hasan** — Good, **Da'if** — Weak).
+
+## Explanation
+Provide a clear scholarly explanation in the user's language.
+Break down complex concepts into digestible points using bullet lists if helpful.
+
+## Source
+List all references with book name and hadith number.
+Include chain of narration information if available.
+
+Additional rules:
+- Use **bold** for key terms and hadith gradings.
+- Use *italic* for transliterations of Arabic terms.
+- Use > blockquotes for direct hadith text translations.
+- Always keep the original Arabic hadith text in Arabic script — do NOT transliterate it.
+- If the source is from Sahih Bukhari or Sahih Muslim, explicitly note it as **Sahih** (Authentic).
+- If there are known issues with any narration, mention the grade (Da'if, Mawdu', Isra'iliyyat).
+
+Return the final answer as Markdown text (not JSON). Use the user's language.
 """
 
 
 def global_spokesperson(state: HikmahState) -> dict:
     """Translate verified Arabic → user's native language."""
-    llm = _get_gemini()
+    llm = _get_primary_llm()
     lang = state.get("input_language", "en")
     draft = state["arabic_scholarly_draft"]
     notes = state.get("verification_notes", "")
