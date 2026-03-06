@@ -546,7 +546,7 @@
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative z-10 w-full">
+    <main class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 pb-32 relative z-10 w-full">
 
         <!-- STATE 1: IDLE -->
         <div id="state-idle" class="text-center max-w-5xl w-full mx-auto space-y-8 animate-fade-in">
@@ -625,6 +625,13 @@
                     <div class="w-24 h-24 rounded-full border-4 border-emerald flex items-center justify-center">
                         <span class="text-emerald font-bold text-xs tracking-widest">VERIFIED</span>
                     </div>
+                </div>
+
+                <!-- User Question Section -->
+                <div class="mb-8 border-b border-gray-100 pb-6">
+                    <h3 class="font-serif text-xl md:text-2xl font-bold text-gray-800 mb-2" id="result-question-en">
+                    </h3>
+                    <p class="font-arabic text-lg text-gray-500" dir="rtl" id="result-question-ar"></p>
                 </div>
 
                 <!-- Arabic Section -->
@@ -706,7 +713,10 @@
             <!-- New Search Button -->
             <div class="text-center mt-8">
                 <button onclick="reset()"
-                    class="text-sm text-gray-500 hover:text-emerald border-b border-gray-200 hover:border-emerald transition-colors pb-1">
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-emerald text-emerald rounded-xl hover:bg-emerald hover:text-white transition-all font-medium shadow-sm active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
                     Ask another question
                 </button>
             </div>
@@ -734,7 +744,13 @@
                 </div>
 
                 <div class="mt-8">
-                    <button onclick="reset()" class="text-sm text-gray-500 hover:text-emerald transition-colors">
+                    <button onclick="reset()"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 text-gray-600 rounded-xl hover:border-emerald hover:text-emerald transition-all font-medium shadow-sm active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
                         Try a different query
                     </button>
                 </div>
@@ -744,7 +760,7 @@
     </main>
 
     <!-- FOOTER INPUT -->
-    <footer class="p-6 bg-white/80 backdrop-blur-sm border-t border-black/5 sticky bottom-0">
+    <footer class="p-6 bg-white/80 backdrop-blur-sm border-t border-black/5 sticky bottom-0 z-20">
         <div class="max-w-5xl mx-auto relative">
             <form id="form" class="flex gap-3 items-center">
                 <input type="text" id="input" placeholder="Type your question here..."
@@ -1016,8 +1032,16 @@
                     if (fallbackMsg) {
                         fallbackMsg.innerHTML = renderAnswer(data.answer || "I could not find a verified answer with high confidence in the sources.");
                     }
+                    input.value = ''; // clear input for follow-up questions
                     show('fallback');
                 } else {
+                    // Set user query text
+                    document.getElementById('result-question-en').textContent = query;
+                    document.getElementById('result-question-ar').textContent = renderArabicText(data.arabic_query);
+
+                    // Clear input for follow-up questions
+                    input.value = '';
+
                     // Render Arabic draft
                     document.getElementById('result-arabic').textContent = renderArabicText(data.arabic_draft);
 

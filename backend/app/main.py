@@ -107,5 +107,6 @@ async def ask(req: AskRequest):
         sources=sources,
         is_fallback=is_fallback,
         arabic_draft=result.get("arabic_scholarly_draft", ""),
+        arabic_query=result.get("arabic_query", ""),
         verification_notes=result.get("verification_notes", ""),
     )

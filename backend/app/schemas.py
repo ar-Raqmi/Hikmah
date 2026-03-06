@@ -79,4 +79,5 @@ class AskResponse(BaseModel):
         description="True when amanah_score < 85 → Wallahu Alam triggered",
     )
     arabic_draft: str = Field("", description="Original Arabic scholarly draft")
+    arabic_query: str = Field("", description="Scholarly Arabic translation of the user query")
     verification_notes: str = Field("", description="Verifier audit remarks")
