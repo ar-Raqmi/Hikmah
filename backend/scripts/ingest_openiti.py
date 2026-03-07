@@ -99,6 +99,7 @@ def main():
                 model="models/gemini-embedding-001",
                 content=batch,
                 task_type="retrieval_document",
+                output_dimensionality=768,
             )
             # `embed_content` returns a dict with 'embedding': list[list[float]] when passed a list of strings
             batch_embeddings = resp["embedding"]

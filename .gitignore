@@ -38,3 +38,13 @@ yarn-error.log*
 # IDEs
 .vscode/
 .idea/
+
+# Cloudflare
+.wrangler/
+
+# Jupyter / data science
+.ipynb_checkpoints/
+
+# Project-specific Data
+data/
+test_*.txt

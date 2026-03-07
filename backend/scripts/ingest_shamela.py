@@ -97,6 +97,7 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
             model="models/gemini-embedding-001",
             content=batch,
             task_type="retrieval_document",
+            output_dimensionality=768,
         )
         vectors.extend(result["embedding"])
         logger.info("Embedded batch %d–%d", i, i + len(batch))

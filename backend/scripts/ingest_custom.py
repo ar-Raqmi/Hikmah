@@ -122,6 +122,7 @@ def main():
                 model="models/gemini-embedding-001",
                 content=batch,
                 task_type="retrieval_document",
+                output_dimensionality=768,
             )
             batch_embeddings = resp["embedding"]
             

@@ -205,6 +205,7 @@ def researcher_agent(state: HikmahState) -> dict:
                 model="models/gemini-embedding-001",
                 content=arabic_q,
                 task_type="retrieval_query",
+                output_dimensionality=768,
             )
             query_vector = embed_result["embedding"]
             chunks = vc.query(vector=query_vector, top_k=5)
