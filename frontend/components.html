@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hikmah Component Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- M3E: Material 3 Expressive Web Components (Local Bundle) -->
+    <script type="module" src="m3e-bundle.js"></script>
+    <!-- M3E: Material Symbols font for icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Fonts: Force Arabic rendering with multiple fallbacks + Noto Naskh Arabic (covers all devices) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --paper: #FDFCF8;
+            --ink: #1a1a1a;
+            --accent: #065F46;
+            --accent-light: #10B981;
+            --gold: #B8860B;
+            --sahih-color: #065F46;
+            --sahih-bg: rgba(6, 95, 70, 0.08);
+            --hasan-color: #1D4ED8;
+            --hasan-bg: rgba(29, 78, 216, 0.08);
+            --daif-color: #D97706;
+            --daif-bg: rgba(217, 119, 6, 0.08);
+            --mawdu-color: #DC2626;
+            --mawdu-bg: rgba(220, 38, 38, 0.08);
+            --israiliyyat-color: #7C3AED;
+            --israiliyyat-bg: rgba(124, 58, 237, 0.08);
+            --unknown-color: #6B7280;
+            --unknown-bg: rgba(107, 114, 128, 0.08);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--paper);
+            color: var(--ink);
+            background-image: radial-gradient(#E5E2D6 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* ===== ARABIC FONT STACK ===== */
+        .font-arabic {
+            font-family: 'Noto Naskh Arabic', 'Amiri', 'Traditional Arabic', 'Simplified Arabic',
+                'Sakkal Majalla', 'Al Bayan', 'Geeza Pro', 'Baghdad', 'KufiStandardGK',
+                'DejaVu Sans', 'Arial Unicode MS', serif;
+            line-height: 2.2;
+            letter-spacing: 0.02em;
+            word-spacing: 0.1em;
+            font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .font-serif {
+            font-family: 'Crimson Pro', Georgia, serif;
+        }
+
+        /* ===== MANUSCRIPT CARD ===== */
+        .manuscript-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow:
+                0 10px 15px -3px rgba(0, 0, 0, 0.05),
+                0 4px 6px -2px rgba(0, 0, 0, 0.03),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+
+        /* ===== ORNAMENT DIVIDER ===== */
+        .ornament-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--gold);
+            opacity: 0.6;
+        }
+
+        .ornament-divider::before,
+        .ornament-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        /* ===== INPUT FIELD ===== */
+        .input-field {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(6, 95, 70, 0.1);
+            outline: none;
+        }
+
+        /* ===== SKELETON LOADING ===== */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ===== ARABIC TEXT BOX ===== */
+        .arabic-text-box {
+            background: linear-gradient(135deg, rgba(6, 95, 70, 0.03), rgba(6, 95, 70, 0.06));
+            border: 1px solid rgba(6, 95, 70, 0.1);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .arabic-text-box::before {
+            content: "﴾";
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            font-size: 2.5rem;
+            opacity: 0.08;
+            font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+            color: var(--accent);
+        }
+
+        .arabic-text-box::after {
+            content: "﴿";
+            position: absolute;
+            bottom: 8px;
+            left: 16px;
+            font-size: 2.5rem;
+            opacity: 0.08;
+            font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+            color: var(--accent);
+        }
+
+        /* ===== FORMATTED ANSWER CONTENT ===== */
+        .answer-content {
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 1.1rem;
+            line-height: 1.85;
+            color: #374151;
+        }
+
+        .answer-content h2 {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin: 2rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(6, 95, 70, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .answer-content h2::before {
+            content: "";
+            display: inline-block;
+            width: 3px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* Inline Arabic text within English answer */
+        .answer-content [dir="rtl"],
+        .answer-content .arabic-inline {
+            font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+            line-height: 2;
+            direction: rtl;
+            unicode-bidi: embed;
+        }
+
+        /* ===== AUTHENTICITY BADGE SYSTEM ===== */
+        .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1.5px solid;
+            transition: all 0.2s ease;
+        }
+
+        .grade-badge:hover {
+            transform: scale(1.04);
+        }
+
+        .grade-badge .grade-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .grade-sahih {
+            color: var(--sahih-color);
+            background: var(--sahih-bg);
+            border-color: rgba(6, 95, 70, 0.2);
+        }
+
+        .grade-sahih .grade-dot {
+            background: var(--sahih-color);
+        }
+
+        .grade-hasan {
+            color: var(--hasan-color);
+            background: var(--hasan-bg);
+            border-color: rgba(29, 78, 216, 0.2);
+        }
+
+        .grade-hasan .grade-dot {
+            background: var(--hasan-color);
+        }
+
+        .grade-daif {
+            color: var(--daif-color);
+            background: var(--daif-bg);
+            border-color: rgba(217, 119, 6, 0.2);
+        }
+
+        .grade-daif .grade-dot {
+            background: var(--daif-color);
+        }
+
+        .grade-mawdu {
+            color: var(--mawdu-color);
+            background: var(--mawdu-bg);
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+
+        .grade-mawdu .grade-dot {
+            background: var(--mawdu-color);
+        }
+
+        .grade-israiliyyat {
+            color: var(--israiliyyat-color);
+            background: var(--israiliyyat-bg);
+            border-color: rgba(124, 58, 237, 0.2);
+        }
+
+        .grade-israiliyyat .grade-dot {
+            background: var(--israiliyyat-color);
+        }
+
+        .grade-unknown {
+            color: var(--unknown-color);
+            background: var(--unknown-bg);
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .grade-unknown .grade-dot {
+            background: var(--unknown-color);
+        }
+
+        /* ===== SOURCE CARD ===== */
+        .source-card {
+            background: #FAFAF9;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .source-card:hover {
+            border-color: rgba(6, 95, 70, 0.3);
+            box-shadow: 0 2px 8px rgba(6, 95, 70, 0.08);
+        }
+
+        /* ===== VERIFICATION INFO PANEL ===== */
+        .verification-panel {
+            background: linear-gradient(135deg, rgba(6, 95, 70, 0.02), rgba(6, 95, 70, 0.05));
+            border: 1px solid rgba(6, 95, 70, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+        }
+
+        /* Gallery specific styles */
+        .section-header {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4B5563;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .gallery-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .component-box {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px dashed #CBD5E1;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { paper: '#FDFCF8', ink: '#1a1a1a', emerald: '#065F46', gold: '#B8860B', } } }
+        }
+    </script>
+</head>
+
+<body>
+    <m3e-theme color="#065F46" scheme="light" motion="expressive">
+
+        <!-- HEADER -->
+        <header class="p-6 border-b border-black/5 bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <h1 class="font-serif text-2xl font-bold text-ink tracking-tight">Hikmah Component Gallery</h1>
+                </div>
+                <div class="text-xs text-gray-400 font-medium tracking-wide uppercase">UI Testing Environment</div>
+            </div>
+        </header>
+
+        <div class="gallery-container space-y-12">
+            <p class="text-gray-500 mb-8 italic">Use this page to review and design UI elements. All data here is
+                static/mocked.</p>
+
+            <!-- SECTION: Buttons & Controls -->
+            <section class="component-box">
+                <h2 class="section-header">1. Buttons & Controls</h2>
+                <div class="flex flex-col gap-6">
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-2">Suggestion Chips (M3E Button Group)
+                        </p>
+                        <m3e-button-group variant="connected" style="max-width: 100%; flex-wrap: wrap;">
+                            <m3e-button variant="tonal">Who is Allah?</m3e-button>
+                            <m3e-button variant="tonal" dir="rtl" class="font-arabic">ما حكم صلاة الضحى؟</m3e-button>
+                            <m3e-button variant="tonal">Hadith on patience</m3e-button>
+                        </m3e-button-group>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-2">Search Input with Button</p>
+                        <div class="flex gap-3 items-center max-w-xl">
+                            <input type="text" placeholder="Type your question here..."
+                                class="flex-1 px-6 h-[60px] rounded-xl input-field font-serif text-lg text-gray-800 placeholder-gray-400">
+                            <m3e-button size="medium" variant="filled" shape="square">
+                                <m3e-icon name="search"></m3e-icon>
+                            </m3e-button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Badges & Legend -->
+            <section class="component-box">
+                <h2 class="section-header">2. Authenticity Badges (`grade-badge`)</h2>
+
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <span class="grade-badge grade-sahih"><span class="grade-dot"></span>Sahih</span>
+                    <span class="grade-badge grade-hasan"><span class="grade-dot"></span>Hasan</span>
+                    <span class="grade-badge grade-daif"><span class="grade-dot"></span>Da'if</span>
+                    <span class="grade-badge grade-mawdu"><span class="grade-dot"></span>Mawdu'</span>
+                    <span class="grade-badge grade-israiliyyat"><span class="grade-dot"></span>Isra'iliyyat</span>
+                    <span class="grade-badge grade-unknown"><span class="grade-dot"></span>Ungraded</span>
+                </div>
+
+                <div class="p-4 bg-white rounded-lg border border-gray-100">
+                    <p class="text-xs text-gray-400 font-bold uppercase mb-2">Grade Legend (Footer Style)</p>
+                    <div class="flex flex-wrap gap-6 mt-2">
+                        <span
+                            class="inline-flex items-center gap-2 font-medium text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md">
+                            <span class="w-2 h-2 rounded-full" style="background: var(--sahih-color);"></span>Sahih
+                            (Authentic)
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-2 font-medium text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md">
+                            <span class="w-2 h-2 rounded-full" style="background: var(--hasan-color);"></span>Hasan
+                            (Good)
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Source Cards -->
+            <section class="component-box">
+                <h2 class="section-header">3. Source Cards (`source-card`)</h2>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- Sahih Source -->
+                    <div class="source-card">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-arabic text-sm font-semibold text-gray-800" dir="rtl">Sahih
+                                    al-Bukhari</span>
+                                <span class="text-xs text-gray-400 font-mono">#73</span>
+                            </div>
+                            <span class="grade-badge grade-sahih"><span class="grade-dot"></span>Sahih</span>
+                        </div>
+                        <p class="font-arabic text-sm text-gray-500 leading-relaxed" dir="rtl">
+                            عَنْ ابْنِ مَسْعُودٍ قَالَ قَالَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ...
+                        </p>
+                        <div class="mt-2"><span class="text-[0.65rem] text-gray-400 italic">Authentic</span></div>
+                    </div>
+
+                    <!-- Da'if Source -->
+                    <div class="source-card">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-arabic text-sm font-semibold text-gray-800" dir="rtl">Sunan Ibn
+                                    Majah</span>
+                                <span class="text-xs text-gray-400 font-mono">#1024</span>
+                            </div>
+                            <span class="grade-badge grade-daif"><span class="grade-dot"></span>Da'if</span>
+                        </div>
+                        <p class="font-arabic text-sm text-gray-500 leading-relaxed" dir="rtl">
+                            نص الحديث الضعيف يوضع هنا كمثال...
+                        </p>
+                        <div class="mt-2"><span class="text-[0.65rem] text-gray-400 italic">Weak Narration</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Loading State -->
+            <section class="component-box">
+                <h2 class="section-header">4. Loading/Thinking State (`#state-thinking`)</h2>
+
+                <div
+                    class="manuscript-card rounded-2xl p-8 md:p-10 text-center relative overflow-hidden max-w-2xl mx-auto">
+                    <!-- M3E Expressive Progress -->
+                    <div class="absolute top-0 left-0 w-full mb-8">
+                        <m3e-linear-progress-indicator mode="indeterminate" variant="wavy"
+                            style="--m3e-progress-indicator-color: var(--accent); width: 100%;"></m3e-linear-progress-indicator>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4 mb-4 mt-4">
+                        <m3e-loading-indicator></m3e-loading-indicator>
+                    </div>
+                    <div class="font-serif italic text-gray-500 animate-pulse tracking-wide mb-8 mt-2">
+                        Seeking knowledge...
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4 mb-8">
+                        <div class="h-10 w-3/4 skeleton rounded-xl opacity-60"></div>
+                        <div class="h-8 w-1/2 skeleton rounded-xl opacity-40"></div>
+                    </div>
+                    <div class="h-4 w-4/5 mx-auto skeleton rounded-lg opacity-30"></div>
+                    <div class="h-4 w-3/4 mx-auto skeleton rounded-lg opacity-20"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: Success State (Full Card) -->
+            <section class="component-box">
+                <h2 class="section-header">5. Success State Card (`#state-success`)</h2>
+
+                <div class="manuscript-card rounded-2xl p-6 md:p-10 relative overflow-hidden">
+
+                    <!-- Verification Stamp -->
+                    <div class="absolute top-6 right-6 opacity-20 rotate-6 pointer-events-none">
+                        <div class="w-24 h-24 rounded-full border-4 border-emerald flex items-center justify-center">
+                            <span class="text-emerald font-bold text-xs tracking-widest">VERIFIED</span>
+                        </div>
+                    </div>
+
+                    <!-- User Question Section -->
+                    <div class="mb-8 border-b border-gray-100 pb-6">
+                        <h3 class="font-serif text-xl md:text-2xl font-bold text-gray-800 mb-2">What is the ruling on
+                            seeking knowledge?</h3>
+                        <p class="font-arabic text-lg text-gray-500" dir="rtl">ما فضل طلب العلم؟</p>
+                    </div>
+
+                    <!-- Arabic Section -->
+                    <div class="arabic-text-box mb-8">
+                        <p class="font-arabic text-xl md:text-2xl text-emerald leading-relaxed text-center font-medium"
+                            dir="rtl">
+                            طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ. مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ
+                            عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ.
+                        </p>
+                    </div>
+
+                    <div class="ornament-divider text-lg mb-6">❧</div>
+
+                    <!-- Answer Section (English) -->
+                    <div class="answer-content">
+                        <p>According to the <strong>Sahih al-Bukhari</strong>, the Prophet (peace be upon him) said:
+                            'Seeking knowledge is obligatory upon every Muslim.' This hadith emphasizes the foundational
+                            importance of education in Islam.</p>
+
+                        <h2>Key Takeaways:</h2>
+                        <ul>
+                            <li>Knowledge is a duty for all believers.</li>
+                            <li>Both men and women are equally encouraged to learn.</li>
+                            <li><span class="font-arabic arabic-inline" dir="rtl">وَاللَّهُ أَعْلَمُ</span> (And Allah
+                                knows best).</li>
+                        </ul>
+                        <blockquote>"He who treads a path in search of knowledge, Allah will direct him to a path
+                            leading to Paradise." (Sahih Muslim 2699)</blockquote>
+                    </div>
+
+                    <!-- Footers & Scores -->
+                    <div class="mt-10 pt-6 border-t border-gray-100">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                            <div class="flex-1">
+                                <span
+                                    class="text-xs text-gray-400 block mb-1 font-medium tracking-wider uppercase">Source</span>
+                                <span class="font-bold text-emerald text-sm block">Sahih al-Bukhari, Sahih Muslim</span>
+                            </div>
+
+                            <!-- Amanah Score Ring -->
+                            <div class="flex items-center gap-4">
+                                <m3e-circular-progress-indicator variant="wavy" max="100" value="50"
+                                    style="--m3e-circular-wavy-progress-indicator-diameter: 72px; --m3e-circular-progress-indicator-thickness: 4px; --m3e-progress-indicator-color: var(--accent); --m3e-circular-wavy-progress-indicator-amplitude: 1px;">
+                                    <div class="flex flex-col items-center justify-center -mt-1">
+                                        <span class="text-lg font-bold text-emerald">50</span>
+                                        <span class="text-[0.55rem] text-gray-400 font-medium -mt-1">AMANAH</span>
+                                    </div>
+                                </m3e-circular-progress-indicator>
+                            </div>
+                        </div>
+
+                        <!-- Verification Notes -->
+                        <div class="mt-4">
+                            <button
+                                class="flex items-center gap-2 text-xs text-gray-400 hover:text-emerald transition-colors mb-2">
+                                <svg class="w-3 h-3 transition-transform rotate-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                                <span class="font-medium tracking-wider uppercase">Verification Notes</span>
+                            </button>
+                            <div class="verification-panel">
+                                <p class="font-arabic text-sm text-gray-600 leading-relaxed" dir="rtl">
+                                    This Hadith is recorded in the Sahih and Sunan with verified chains (Sahih).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Fallback State -->
+            <section class="component-box">
+                <h2 class="section-header">6. Fallback State (`#state-fallback`)</h2>
+
+                <div
+                    class="manuscript-card rounded-2xl p-8 md:p-10 text-center border-t-4 border-gray-300 max-w-4xl mx-auto">
+                    <div
+                        class="w-16 h-16 mx-auto rounded-full bg-gray-50 flex items-center justify-center text-gray-400 mb-6 border border-gray-200">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                    </div>
+
+                    <p class="text-gray-600 mb-6 text-lg answer-content">I could not find a verified answer with high
+                        confidence in the primary sources. It is best to consult with a local Mufti.</p>
+
+                    <div class="py-6 px-8 bg-gray-50 rounded-xl border border-gray-200">
+                        <p class="font-arabic text-3xl text-gray-400 mb-3" dir="rtl">وَاللهُ أَعْلَمُ</p>
+                        <p class="font-serif text-lg text-gray-500 italic">And Allah knows best</p>
+                    </div>
+
+                    <div class="mt-8">
+                        <m3e-button variant="tonal">
+                            <m3e-icon slot="icon" name="refresh"></m3e-icon>
+                            Try a different query
+                        </m3e-button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Error Notice -->
+            <section class="component-box">
+                <h2 class="section-header">7. Error Notices</h2>
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    <strong>Error:</strong> API rate limit reached. Please wait a moment and try again.
+                </div>
+            </section>
+
+        </div>
+    </m3e-theme>
+</body>
+
+</html>
