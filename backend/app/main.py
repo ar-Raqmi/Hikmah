@@ -76,7 +76,11 @@ async def ask(req: AskRequest):
     graph = _get_graph()
 
     try:
-        result = graph.invoke({"original_query": req.query})
+        history_dicts = [{"role": h.role, "content": h.content} for h in req.history]
+        result = graph.invoke({
+            "original_query": req.query,
+            "conversation_history": history_dicts,
+        })
     except Exception as exc:
         logger.exception("Pipeline error")
         # Surface Gemini / OpenAI quota/rate-limit errors as 429 instead of 500

@@ -24,6 +24,7 @@ class HikmahState(TypedDict, total=False):
     # — Set by entry point —
     original_query: str
     input_language: str  # ISO 639-1 code detected by polyglot_translator
+    conversation_history: list[dict]  # [{"role": "user"|"assistant", "content": "..."}]
 
     # — Set by polyglot_translator —
     arabic_query: str  # Scholarly Arabic reformulation
@@ -33,7 +34,7 @@ class HikmahState(TypedDict, total=False):
     arabic_scholarly_draft: str  # Dalil-First Arabic answer
 
     # — Set by verifier_agent —
-    amanah_score: int  # 0–100 integrity score
+    amanah_score: int  # 0–100 AI faithfulness score (NOT source grading)
     verification_notes: str  # Auditor remarks (Arabic)
 
     # — Set by global_spokesperson OR wallahu_alam —
@@ -47,8 +48,15 @@ class HikmahState(TypedDict, total=False):
 # FastAPI Request / Response
 # ---------------------------------------------------------------------------
 
+class HistoryEntry(BaseModel):
+    """A single turn in the conversation history."""
+
+    role: str = Field(..., pattern="^(user|assistant)$", description="Either 'user' or 'assistant'")
+    content: str = Field(..., min_length=1, description="The message content")
+
+
 class AskRequest(BaseModel):
-    """Incoming user question."""
+    """Incoming user question with optional conversation history."""
 
     query: str = Field(
         ...,
@@ -56,6 +64,10 @@ class AskRequest(BaseModel):
         max_length=2000,
         description="User question in any supported language (ja, it, de, en, ar …)",
         json_schema_extra={"examples": ["الصلاة الفجر كم ركعة؟", "断食の条件は何ですか？"]},
+    )
+    history: list[HistoryEntry] = Field(
+        default_factory=list,
+        description="Previous conversation turns for follow-up context",
     )
 
 

@@ -94,7 +94,7 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
     for i in range(0, len(texts), 100):
         batch = texts[i : i + 100]
         result = genai.embed_content(
-            model="models/text-embedding-004",
+            model="models/gemini-embedding-001",
             content=batch,
             task_type="retrieval_document",
         )
@@ -115,13 +115,27 @@ def make_id(filename: str, chunk_idx: int) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()[:24]
 
 
-def run(input_dir: str, batch_size: int = 50) -> None:
+def run_with_args(args) -> None:
     """Full ingestion pipeline."""
-    vc = VectorizeClient(
-        account_id=os.environ["CLOUDFLARE_ACCOUNT_ID"],
-        api_token=os.environ["CLOUDFLARE_API_TOKEN"],
-        index_name="hikmah-sahih-index",
-    )
+    input_dir = args.input_dir
+    batch_size = args.batch_size
+
+    cf_account = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    cf_token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    dry_run = False
+
+    if not cf_account or not cf_token:
+        logger.warning("CLOUDFLARE_ACCOUNT_ID or CLOUDFLARE_API_TOKEN not set in .env. Execution will run as a dry run.")
+        dry_run = True
+
+    if not dry_run:
+        vc = VectorizeClient(
+            account_id=cf_account,
+            api_token=cf_token,
+            index_name="hikmah-sahih-index",
+        )
+    else:
+        vc = None # Will not be used for upsert
 
     htm_files = sorted(glob(os.path.join(input_dir, "*.htm")))
     if not htm_files:
@@ -142,9 +156,11 @@ def run(input_dir: str, batch_size: int = 50) -> None:
                 "id": make_id(fname, idx),
                 "text": chunk,
                 "metadata": {
-                    "source_file": fname,
-                    "chunk_index": idx,
-                    "text": chunk[:500],  # store truncated text in metadata
+                    "book": getattr(args, "book", ""),
+                    "author": getattr(args, "author", ""),
+                    "grade": getattr(args, "grade", "ungraded"),
+                    "source_pipeline": "shamela",
+                    "text": chunk,
                 },
             })
 
@@ -181,6 +197,13 @@ def run(input_dir: str, batch_size: int = 50) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ingest Shamela HTML → Vectorize")
     parser.add_argument("--input-dir", required=True, help="Directory with *.htm files")
+    parser.add_argument("--book", required=True, help="Name of the book or collection")
+    parser.add_argument("--author", required=True, help="Author of the text")
+    parser.add_argument("--grade", default="ungraded", help="Default grading (e.g. sahih, hasan)")
     parser.add_argument("--batch-size", type=int, default=50, help="Upsert batch size")
     args = parser.parse_args()
-    run(args.input_dir, args.batch_size)
+    
+    # Define globally so run() can access args natively via getattr or we pass them, 
+    # but the easiest fix here is simply to let the script use `args` cleanly.
+    # We will pass args to run()
+    run_with_args(args)

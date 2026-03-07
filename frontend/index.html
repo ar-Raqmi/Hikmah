@@ -583,22 +583,36 @@
                     </m3e-button-group>
                 </div>
 
-                <!-- Grade Legend (educational) -->
-                <div class="mt-6 flex flex-col items-center gap-2">
-                    <span class="text-xs text-gray-400 font-medium tracking-wider uppercase">Source Grading
-                        System</span>
-                    <div class="grade-legend justify-center">
-                        <span class="legend-item"><span class="legend-dot"
-                                style="background: var(--sahih-color);"></span>Sahih (Authentic)</span>
-                        <span class="legend-item"><span class="legend-dot"
-                                style="background: var(--hasan-color);"></span>Hasan (Good)</span>
-                        <span class="legend-item"><span class="legend-dot"
-                                style="background: var(--daif-color);"></span>Da'if (Weak)</span>
-                        <span class="legend-item"><span class="legend-dot"
-                                style="background: var(--mawdu-color);"></span>Mawdu' (Fabricated)</span>
-                        <span class="legend-item"><span class="legend-dot"
-                                style="background: var(--israiliyyat-color);"></span>Isra'iliyyat</span>
+                <!-- Grade Legend & Amanah (educational) -->
+                <div class="mt-6 flex flex-col items-center gap-6 max-w-2xl mx-auto">
+
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-xs text-gray-400 font-medium tracking-wider uppercase">Source Grading
+                            System</span>
+                        <div class="grade-legend justify-center">
+                            <span class="legend-item" title="Authentic Hadith"><span class="legend-dot"
+                                    style="background: var(--sahih-color);"></span>Sahih</span>
+                            <span class="legend-item" title="Good Hadith"><span class="legend-dot"
+                                    style="background: var(--hasan-color);"></span>Hasan</span>
+                            <span class="legend-item" title="Weak Hadith"><span class="legend-dot"
+                                    style="background: var(--daif-color);"></span>Da'if</span>
+                            <span class="legend-item" title="Fabricated Hadith"><span class="legend-dot"
+                                    style="background: var(--mawdu-color);"></span>Mawdu'</span>
+                            <span class="legend-item" title="Judeo-Christian tradition"><span class="legend-dot"
+                                    style="background: var(--israiliyyat-color);"></span>Isra'iliyyat</span>
+                        </div>
                     </div>
+
+                    <div class="flex flex-col items-center gap-2 border-t border-gray-100 pt-4 w-full">
+                        <span class="text-xs text-gray-400 font-medium tracking-wider uppercase">Amanah Score</span>
+                        <p class="text-xs text-gray-500 text-center leading-relaxed">
+                            While <strong class="text-gray-700">Grading</strong> is the historical authenticity of the
+                            underlying text (e.g. Sahih), the <strong class="text-gray-700">Amanah Score</strong>
+                            (0-100) is the AI's real-time confidence that its generated English answer is accurate and
+                            strictly supported by these classical sources without fabrication.
+                        </p>
+                    </div>
+
                 </div>
             </div>
 
@@ -628,98 +642,21 @@
                 </div>
             </div>
 
-            <!-- STATE 3: SUCCESS (The Manuscript Card) -->
-            <div id="state-success" class="hidden w-full max-w-4xl mx-auto animate-fade-in">
-                <div class="manuscript-card rounded-2xl p-6 md:p-10 relative overflow-hidden">
+            <div id="state-success" class="hidden w-full max-w-4xl mx-auto flex flex-col gap-10">
+                <!-- All Q&A pairs go here -->
+                <div id="conversation-thread" class="flex flex-col gap-10 w-full mb-12"></div>
 
-                    <!-- Verification Stamp -->
-                    <div class="absolute top-6 right-6 opacity-20 rotate-6 pointer-events-none">
-                        <div class="w-24 h-24 rounded-full border-4 border-emerald flex items-center justify-center">
-                            <span class="text-emerald font-bold text-xs tracking-widest">VERIFIED</span>
-                        </div>
-                    </div>
-
-                    <!-- User Question Section -->
-                    <div class="mb-8 border-b border-gray-100 pb-6">
-                        <h3 class="font-serif text-xl md:text-2xl font-bold text-gray-800 mb-2" id="result-question-en">
-                        </h3>
-                        <p class="font-arabic text-lg text-gray-500" dir="rtl" id="result-question-ar"></p>
-                    </div>
-
-                    <!-- Arabic Section -->
-                    <div class="arabic-text-box mb-8">
-                        <p class="font-arabic text-xl md:text-2xl text-emerald leading-relaxed text-center font-medium"
-                            dir="rtl" id="result-arabic">
-                            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-                        </p>
-                    </div>
-
-                    <!-- Ornamental Divider -->
-                    <div class="ornament-divider text-lg mb-6">❧</div>
-
-                    <!-- Answer Section (Rendered Markdown) -->
-                    <div class="answer-content" id="result-english">
-                        <p>"In the name of Allah, the Most Gracious, the Most Merciful."</p>
-                    </div>
-
-                    <!-- Source Cards Section -->
-                    <div id="sources-section" class="mt-8 hidden">
-                        <div class="flex items-center gap-2 mb-4">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Referenced
-                                Sources</span>
-                        </div>
-                        <div class="space-y-3" id="sources-list"></div>
-                    </div>
-
-                    <!-- Footer: Score + Verification -->
-                    <div class="mt-10 pt-6 border-t border-gray-100">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-                            <!-- Source Info -->
-                            <div class="flex-1">
-                                <span
-                                    class="text-xs text-gray-400 block mb-1 font-medium tracking-wider uppercase">Source</span>
-                                <span class="font-bold text-emerald text-sm block" id="result-source">Knowledge
-                                    Base</span>
-                            </div>
-
-                            <!-- Amanah Score Ring -->
-                            <div class="flex items-center gap-4">
-                                <m3e-circular-progress-indicator variant="wavy" id="score-ring" max="100" value="0"
-                                    style="--m3e-circular-wavy-progress-indicator-diameter: 72px; --m3e-circular-progress-indicator-thickness: 4px; --m3e-progress-indicator-color: var(--accent); --m3e-circular-wavy-progress-indicator-amplitude: 1px;">
-                                    <div class="flex flex-col items-center justify-center -mt-1">
-                                        <span class="text-lg font-bold text-emerald" id="score-number">0</span>
-                                        <span class="text-[0.55rem] text-gray-400 font-medium -mt-1">AMANAH</span>
-                                    </div>
-                                </m3e-circular-progress-indicator>
-                            </div>
-                        </div>
-
-                        <!-- Verification Notes (collapsible) -->
-                        <div id="verification-section" class="mt-4 hidden">
-                            <button onclick="toggleVerification()"
-                                class="flex items-center gap-2 text-xs text-gray-400 hover:text-emerald transition-colors mb-2"
-                                id="verification-toggle">
-                                <svg class="w-3 h-3 transition-transform" id="verification-chevron" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                                <span class="font-medium tracking-wider uppercase">Verification Notes</span>
-                            </button>
-                            <div id="verification-body" class="hidden verification-panel">
-                                <p class="font-arabic text-sm text-gray-600 leading-relaxed" dir="rtl"
-                                    id="verification-notes-text"></p>
-                            </div>
+                <!-- Thinking indicator (inline for follow-ups) -->
+                <div id="inline-thinking" class="hidden w-full animate-fade-in">
+                    <div class="manuscript-card rounded-2xl p-8 text-center opacity-60">
+                        <div class="flex flex-col items-center gap-4">
+                            <m3e-loading-indicator></m3e-loading-indicator>
+                            <div class="font-serif italic text-gray-500 animate-pulse" id="inline-status">Consulting the
+                                archives...</div>
                         </div>
                     </div>
                 </div>
-
-                <!-- (Placeholder for future buttons) -->
+            </div>
             </div>
 
             <!-- STATE 4: FALLBACK (Wallahu Alam) -->
@@ -745,10 +682,7 @@
                     </div>
 
                     <div class="mt-8">
-                        <m3e-button variant="tonal" onclick="reset()">
-                            <m3e-icon slot="icon" name="refresh"></m3e-icon>
-                            Try a different query
-                        </m3e-button>
+                        <!-- Removed redundant button as New Topic is now in footer -->
                     </div>
                 </div>
             </div>
@@ -758,16 +692,24 @@
         <!-- FOOTER INPUT -->
         <footer class="p-6 bg-white/80 backdrop-blur-sm border-t border-black/5 sticky bottom-0 z-20">
             <div class="max-w-5xl mx-auto relative">
-                <form id="form" class="flex gap-3 items-center">
+                <form id="form" class="flex gap-4 items-center">
                     <input type="text" id="input" placeholder="Type your question here..."
-                        class="flex-1 px-6 h-[60px] rounded-xl input-field font-serif text-lg text-gray-800 placeholder-gray-400"
+                        class="flex-1 px-6 h-[64px] rounded-xl input-field font-serif text-lg text-gray-800 placeholder-gray-400"
                         autocomplete="off">
-                    <button type="submit" id="submit-btn"
-                        style="background:transparent; border:none; padding:0; cursor:pointer;" aria-label="Search">
-                        <m3e-button size="medium" variant="filled" shape="square">
-                            <m3e-icon name=" search"></m3e-icon>
+
+                    <div class="flex items-center gap-2 h-[64px]">
+                        <m3e-button type="submit" id="submit-btn" size="medium" variant="filled" shape="square"
+                            style="height: 100%;">
+                            <m3e-icon name="search"></m3e-icon>
                         </m3e-button>
-                    </button>
+
+                        <div id="reset-btn-container" class="hidden h-full">
+                            <m3e-button size="medium" variant="tonal" shape="square" onclick="resetChat(event)"
+                                title="New Topic" style="height: 100%;">
+                                <m3e-icon name="add"></m3e-icon>
+                            </m3e-button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </footer>
@@ -784,6 +726,9 @@
             const input = document.getElementById('input');
             const form = document.getElementById('form');
             const status = document.getElementById('search-status');
+
+            // Conversation history for context awareness
+            let conversationHistory = [];
 
             const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:8000'
@@ -803,10 +748,21 @@
                 }
             }
 
-            function reset() {
+            function resetChat(e) {
+                if (e) e.preventDefault();
                 show('idle');
+                conversationHistory = [];
+                document.getElementById('conversation-thread').innerHTML = '';
+                document.getElementById('reset-btn-container').classList.add('hidden');
+                input.placeholder = "Type your question here...";
                 input.value = '';
                 input.focus();
+            }
+
+            function focusInput() {
+                input.focus();
+                // Scroll to bottom smoothly
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
 
             function ask(q) {
@@ -820,9 +776,9 @@
             });
 
             // ===== TOGGLE VERIFICATION NOTES =====
-            function toggleVerification() {
-                const body = document.getElementById('verification-body');
-                const chevron = document.getElementById('verification-chevron');
+            function toggleVerification(cardElement) {
+                const body = cardElement.querySelector('.verification-panel');
+                const chevron = cardElement.querySelector('.verification-chevron');
                 const isHidden = body.classList.contains('hidden');
                 body.classList.toggle('hidden');
                 chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
@@ -865,17 +821,12 @@
             }
 
             // ===== RENDER SOURCE CARDS =====
-            function renderSources(sources) {
-                const container = document.getElementById('sources-list');
-                const section = document.getElementById('sources-section');
-                container.innerHTML = '';
+            function renderSources(sources, containerElement) {
+                containerElement.innerHTML = '';
 
                 if (!sources || sources.length === 0) {
-                    section.classList.add('hidden');
                     return;
                 }
-
-                section.classList.remove('hidden');
 
                 sources.forEach((src, idx) => {
                     const gradeInfo = detectGrade(src);
@@ -902,26 +853,23 @@
                         <span class="text-[0.65rem] text-gray-400 italic">${gradeInfo.description}</span>
                     </div>
                 `;
-                    container.appendChild(card);
+                    containerElement.appendChild(card);
                 });
             }
 
             // ===== ANIMATE SCORE RING =====
-            function animateScore(score) {
-                const ring = document.getElementById('score-ring');
-                const number = document.getElementById('score-number');
-
+            function animateScore(score, ringElement, numberElement) {
                 // set color based on score
                 let color = 'var(--accent)';
                 if (score < 50) color = 'var(--mawdu-color)';
                 else if (score < 75) color = 'var(--daif-color)';
                 else if (score < 85) color = 'var(--hasan-color)';
 
-                ring.style.setProperty('--m3e-progress-indicator-color', color);
+                ringElement.style.setProperty('--m3e-progress-indicator-color', color);
 
                 // Animate
                 requestAnimationFrame(() => {
-                    ring.value = score;
+                    ringElement.value = score;
                 });
 
                 // Count up number
@@ -933,8 +881,8 @@
                         current = score;
                         clearInterval(timer);
                     }
-                    number.textContent = current;
-                    number.style.color = color;
+                    numberElement.textContent = current;
+                    numberElement.style.color = color;
                 }, 30);
             }
 
@@ -973,109 +921,286 @@
                 return div.innerHTML;
             }
 
+            // ===== RENDER A SINGLE Q&A CARD =====
+            function renderAnswerCard(userQuery, assistantResponse) {
+                const card = document.createElement('div');
+                card.className = 'manuscript-card rounded-2xl p-6 md:p-10 relative overflow-hidden';
+
+                let srcText = "Knowledge Base";
+                if (assistantResponse.sources && assistantResponse.sources.length > 0) {
+                    srcText = assistantResponse.sources.map(s => `${s.book} ${s.hadith_no || ''}`.trim()).join(', ');
+                }
+
+                card.innerHTML = `
+                    <!-- Verification Stamp -->
+                    ${(assistantResponse.amanah_score !== undefined && assistantResponse.amanah_score >= 85) ? `
+                    <div class="absolute top-6 right-6 opacity-20 rotate-6 pointer-events-none">
+                        <div class="w-24 h-24 rounded-full border-4 border-emerald flex items-center justify-center">
+                            <span class="text-emerald font-bold text-xs tracking-widest text-center">VERIFIED</span>
+                        </div>
+                    </div>` : ''}
+
+                    <!-- User Question Section -->
+                    <div class="mb-8 border-b border-gray-100 pb-6">
+                        <h3 class="font-serif text-xl md:text-2xl font-bold text-gray-800 mb-2">${escapeHtml(userQuery)}</h3>
+                        <p class="font-arabic text-lg text-gray-500" dir="rtl">${renderArabicText(assistantResponse.arabic_query)}</p>
+                    </div>
+
+                    <!-- Arabic Section -->
+                    <div class="arabic-text-box mb-8">
+                        <p class="font-arabic text-xl md:text-2xl text-emerald leading-relaxed text-center font-medium"
+                            dir="rtl">
+                            ${renderArabicText(assistantResponse.arabic_draft)}
+                        </p>
+                    </div>
+
+                    <!-- Ornamental Divider -->
+                    <div class="ornament-divider text-lg mb-6">❧</div>
+
+                    <!-- Answer Section (Rendered Markdown) -->
+                    <div class="answer-content">
+                        ${renderAnswer(assistantResponse.content)}
+                    </div>
+
+                    <!-- Source Cards Section -->
+                    <div class="sources-section mt-8 ${assistantResponse.sources && assistantResponse.sources.length > 0 ? '' : 'hidden'}">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                </path>
+                            </svg>
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Referenced
+                                Sources</span>
+                        </div>
+                        <div class="sources-list space-y-3"></div>
+                    </div>
+
+                    <!-- Footer: Score + Verification -->
+                    <div class="mt-10 pt-6 border-t border-gray-100">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                            <!-- Source Info -->
+                            <div class="flex-1">
+                                <span
+                                    class="text-xs text-gray-400 block mb-1 font-medium tracking-wider uppercase">Source</span>
+                                <span class="font-bold text-emerald text-sm block">${srcText}</span>
+                            </div>
+
+                            <!-- Amanah Score Ring -->
+                            <div class="flex items-center gap-4">
+                                <m3e-circular-progress-indicator variant="wavy" class="score-ring-element" max="100" value="0"
+                                    style="--m3e-circular-wavy-progress-indicator-diameter: 72px; --m3e-circular-progress-indicator-thickness: 4px; --m3e-progress-indicator-color: var(--accent); --m3e-circular-wavy-progress-indicator-amplitude: 1px;">
+                                    <div class="flex flex-col items-center justify-center -mt-1">
+                                        <span class="text-lg font-bold text-emerald score-number-element">0</span>
+                                        <span class="text-[0.55rem] text-gray-400 font-medium -mt-1">AMANAH</span>
+                                    </div>
+                                </m3e-circular-progress-indicator>
+                            </div>
+                        </div>
+
+                        <!-- Verification Notes (collapsible) -->
+                        <div class="verification-section mt-4 ${assistantResponse.verification_notes && assistantResponse.verification_notes.trim() ? '' : 'hidden'}">
+                            <button onclick="toggleVerification(this.closest('.manuscript-card'))"
+                                class="flex items-center gap-2 text-xs text-gray-400 hover:text-emerald transition-colors mb-2">
+                                <svg class="w-3 h-3 transition-transform verification-chevron" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                                <span class="font-medium tracking-wider uppercase">Verification Notes</span>
+                            </button>
+                            <div class="hidden verification-panel">
+                                <p class="font-arabic text-sm text-gray-600 leading-relaxed" dir="rtl">
+                                    ${escapeHtml(assistantResponse.verification_notes || '')}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Render sources
+                const sourcesListContainer = card.querySelector('.sources-list');
+                if (sourcesListContainer) {
+                    renderSources(assistantResponse.sources, sourcesListContainer);
+                }
+
+                // Animate score ring
+                const scoreRingElement = card.querySelector('.score-ring-element');
+                const scoreNumberElement = card.querySelector('.score-number-element');
+                if (scoreRingElement && scoreNumberElement) {
+                    animateScore(assistantResponse.amanah_score, scoreRingElement, scoreNumberElement);
+                }
+
+                return card;
+            }
+
             // ===== PROCESS QUERY =====
             async function process() {
                 const query = input.value.trim();
                 if (!query) return;
 
-                show('thinking');
+                const isFollowUp = conversationHistory.length > 0;
+                const statusElement = isFollowUp ? document.getElementById('inline-status') : status;
+                const thinkingContainer = isFollowUp ? document.getElementById('inline-thinking') : null;
 
-                // Reset score animation
-                const ring = document.getElementById('score-ring');
-                ring.value = 0;
-                document.getElementById('score-number').textContent = '0';
+                if (isFollowUp) {
+                    thinkingContainer.classList.remove('hidden');
+                    input.value = '';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                } else {
+                    show('thinking');
+                }
 
                 const steps = [
                     'Consulting the archives...',
-                    'Querying Sahih database...',
-                    'Analyzing classical Tafsirs...',
-                    'Verifying chain of narration...',
-                    'Cross-referencing with scholars...',
-                    'Formatting verified answer...'
+                    'Analyzing context...',
+                    'Searching verified sources...',
+                    'Synthesizing answer...',
+                    'Reviewing Amanah score...'
                 ];
                 let stepIdx = 0;
-                status.innerText = steps[0];
+                statusElement.innerText = steps[0];
                 let stageTimer = setInterval(() => {
                     stepIdx = (stepIdx + 1) % steps.length;
-                    status.innerText = steps[stepIdx];
-                }, 2000);
+                    statusElement.innerText = steps[stepIdx];
+                }, 1500);
 
                 try {
                     const resp = await fetch(`${API_BASE}/ask`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query }),
+                        body: JSON.stringify({
+                            query: query,
+                            history: conversationHistory
+                        }),
                     });
 
                     clearInterval(stageTimer);
+                    if (thinkingContainer) thinkingContainer.classList.add('hidden');
 
                     if (!resp.ok) {
-                        if (resp.status === 429) {
-                            throw new Error('Rate limit reached — please wait a moment and try again.');
-                        }
                         const errData = await resp.json().catch(() => ({}));
                         throw new Error(errData.detail || `Server error: ${resp.status}`);
                     }
                     const data = await resp.json();
 
-                    if (data.is_fallback || data.amanah_score < 85) {
-                        const fallbackMsg = document.getElementById('fallback-message');
-                        if (fallbackMsg) {
-                            fallbackMsg.innerHTML = renderAnswer(data.answer || "I could not find a verified answer with high confidence in the sources.");
-                        }
-                        input.value = ''; // clear input for follow-up questions
-                        show('fallback');
-                    } else {
-                        // Set user query text
-                        document.getElementById('result-question-en').textContent = query;
-                        document.getElementById('result-question-ar').textContent = renderArabicText(data.arabic_query);
+                    // Enforce Amanah Score Threshold
+                    const score = data.amanah_score !== undefined ? data.amanah_score : 100;
 
-                        // Clear input for follow-up questions
-                        input.value = '';
+                    if (data.is_fallback || score < 85) {
+                        const fallbackText = data.answer || "I could not find a verified answer with high confidence in the sources.";
 
-                        // Render Arabic draft
-                        document.getElementById('result-arabic').textContent = renderArabicText(data.arabic_draft);
+                        if (isFollowUp) {
+                            conversationHistory.push({ role: 'user', content: query });
+                            conversationHistory.push({
+                                role: 'assistant',
+                                content: fallbackText,
+                                is_fallback: true
+                            });
+                            renderConversationThread();
+                            show('success');
 
-                        // Render English answer as formatted Markdown
-                        document.getElementById('result-english').innerHTML = renderAnswer(data.answer);
+                            document.getElementById('reset-btn-container').classList.remove('hidden');
+                            input.placeholder = "Ask a follow-up...";
+                            input.value = '';
 
-                        // Render sources with grade badges
-                        let srcText = "Knowledge Base";
-                        if (data.sources && data.sources.length > 0) {
-                            srcText = data.sources.map(s => `${s.book} ${s.hadith_no || ''}`.trim()).join(', ');
-                            renderSources(data.sources);
+                            setTimeout(() => {
+                                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                            }, 100);
                         } else {
-                            renderSources([]);
+                            const fallbackMsg = document.getElementById('fallback-message');
+                            if (fallbackMsg) {
+                                fallbackMsg.innerHTML = renderAnswer(fallbackText);
+                            }
+                            // Initialize history so reset button works and we can append further
+                            conversationHistory.push({ role: 'user', content: query });
+                            conversationHistory.push({ role: 'assistant', content: fallbackText, is_fallback: true });
+
+                            document.getElementById('reset-btn-container').classList.remove('hidden');
+                            input.placeholder = "Ask a follow-up or start new topic...";
+                            input.value = '';
+
+                            show('fallback');
                         }
-                        if (!srcText) srcText = "Knowledge Base";
-                        document.getElementById('result-source').innerText = srcText;
-
-                        // Animate score ring
-                        animateScore(data.amanah_score);
-
-                        // Show verification notes if available
-                        const verSection = document.getElementById('verification-section');
-                        const verText = document.getElementById('verification-notes-text');
-                        if (data.verification_notes && data.verification_notes.trim()) {
-                            verText.textContent = data.verification_notes;
-                            verSection.classList.remove('hidden');
-                            // Ensure body is collapsed by default
-                            document.getElementById('verification-body').classList.add('hidden');
-                            document.getElementById('verification-chevron').style.transform = 'rotate(0deg)';
-                        } else {
-                            verSection.classList.add('hidden');
-                        }
-
-                        show('success');
+                        return;
                     }
+
+                    // Update history with full response context (Success State)
+                    conversationHistory.push({ role: 'user', content: query });
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: data.answer,
+                        arabic_query: data.arabic_query,
+                        arabic_draft: data.arabic_draft,
+                        amanah_score: score,
+                        sources: data.sources || [],
+                        verification_notes: data.verification_notes
+                    });
+
+                    // Direct answering: Re-render the thread with full cards
+                    renderConversationThread();
+                    show('success');
+
+                    document.getElementById('reset-btn-container').classList.remove('hidden');
+                    input.placeholder = "Ask a follow-up...";
+                    input.value = '';
+
+                    setTimeout(() => {
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    }, 100);
+
                 } catch (err) {
                     clearInterval(stageTimer);
+                    if (thinkingContainer) thinkingContainer.classList.add('hidden');
                     console.error(err);
-                    const fallbackMsg = document.getElementById('fallback-message');
-                    if (fallbackMsg) {
-                        fallbackMsg.innerHTML = `<p style="color: #DC2626;">Error: ${escapeHtml(err.message || 'Unable to connect to backend')}</p>`;
+                    alert("Error: " + err.message);
+
+                    // On error, if no history, go back to idle
+                    if (conversationHistory.length === 0) show('idle');
+                }
+            }
+
+            const WALLAHU_ALAM_MSG = "I could not find a verified answer with high confidence in the sources.";
+
+            // ===== RENDER CONVERSATION THREAD =====
+            function renderConversationThread() {
+                const thread = document.getElementById('conversation-thread');
+                thread.innerHTML = '';
+
+                // Render EVERY pair in history as a full manuscript card or fallback card
+                for (let i = 0; i < conversationHistory.length; i += 2) {
+                    const userMsg = conversationHistory[i];
+                    const aiMsg = conversationHistory[i + 1];
+
+                    if (!userMsg || !aiMsg) break;
+
+                    if (aiMsg.is_fallback) {
+                        const fallbackCard = document.createElement('div');
+                        fallbackCard.className = 'w-full animate-fade-in mb-4';
+                        fallbackCard.innerHTML = `
+                            <div class="manuscript-card rounded-2xl p-8 md:p-10 text-center border-t-4 border-gray-300 opacity-90 mx-auto max-w-3xl">
+                                <div class="mb-6 border-b border-gray-100 pb-4">
+                                    <h3 class="font-serif text-xl font-bold text-gray-800">${escapeHtml(userMsg.content)}</h3>
+                                </div>
+                                <div class="w-12 h-12 mx-auto rounded-full bg-gray-50 flex items-center justify-center text-gray-400 mb-6 border border-gray-200">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                </div>
+                                <div class="text-gray-600 mb-6 text-base answer-content">
+                                    ${renderAnswer(aiMsg.content)}
+                                </div>
+                                <div class="py-4 px-6 bg-gray-50 rounded-xl border border-gray-200 inline-block">
+                                    <p class="font-arabic text-xl text-gray-400 mb-2" dir="rtl">وَاللهُ أَعْلَمُ</p>
+                                    <p class="font-serif text-sm text-gray-500 italic">And Allah knows best</p>
+                                </div>
+                            </div>
+                        `;
+                        thread.appendChild(fallbackCard);
+                    } else {
+                        const card = renderAnswerCard(userMsg.content, aiMsg);
+                        thread.appendChild(card);
                     }
-                    show('fallback');
                 }
             }
         </script>

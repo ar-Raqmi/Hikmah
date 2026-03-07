@@ -65,68 +65,44 @@ def _parse_json_response(raw: str) -> dict:
 # LLM singletons (initialised lazily via env vars)
 # ---------------------------------------------------------------------------
 
-_gemini: ChatGoogleGenerativeAI | None = None
+_openrouter: ChatOpenAI | None = None
 _gpt4o: ChatOpenAI | None = None
-_groq: "ChatGroq | None" = None
-
 
 def _get_api_key(key_name: str) -> str:
     from dotenv import dotenv_values
     env_dict = dotenv_values(".env")
     return env_dict.get(key_name, "").strip()
 
-def _get_gemini() -> ChatGoogleGenerativeAI | None:
-    """Return Gemini client if GOOGLE_API_KEY is set, else None."""
-    global _gemini
-    api_key = _get_api_key("GOOGLE_API_KEY")
-    if not api_key:
-        return None
-    if _gemini is None:
-        _gemini = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
-            google_api_key=api_key,
-            temperature=0.2,
-        )
-    return _gemini
 
-def _get_groq():
-    """Return Groq (Llama 3.3 70B) client if GROQ_API_KEY is set, else None."""
-    global _groq
-    if not _GROQ_AVAILABLE:
-        return None
-    api_key = _get_api_key("GROQ_API_KEY")
+def _get_primary_llm() -> ChatOpenAI:
+    """Return OpenRouter gpt-4o-mini as the primary fast & cheap engine."""
+    global _openrouter
+    api_key = _get_api_key("OPENAI_API_KEY")
     if not api_key:
-        return None
-    if _groq is None:
-        _groq = ChatGroq(  # type: ignore[assignment]
-            model="llama-3.3-70b-versatile",
+        raise RuntimeError("Missing OPENAI_API_KEY in .env for OpenRouter")
+        
+    if _openrouter is None:
+        _openrouter = ChatOpenAI(
+            model="gpt-4o-mini",
             api_key=api_key,
+            base_url="https://openrouter.ai/api/v1",
             temperature=0.2,
         )
-    return _groq
+    return _openrouter
 
 
-def _get_primary_llm():
-    """Return the best available LLM: Gemini → Groq (fallback)."""
-    llm = _get_gemini() or _get_groq()
-    if llm is None:
-        raise RuntimeError(
-            "No LLM configured. Set GOOGLE_API_KEY (Gemini) or GROQ_API_KEY (Groq) in .env"
-        )
-    logger.info("Using LLM provider: %s", llm.__class__.__name__)
-    return llm
-
-
-def _get_gpt4o() -> ChatOpenAI | None:
-    """Return GPT-4o client if OPENAI_API_KEY is set, else None."""
+def _get_gpt4o() -> ChatOpenAI:
+    """Return OpenRouter gpt-4o for the Verifier (stricter reasoning)."""
     global _gpt4o
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    api_key = _get_api_key("OPENAI_API_KEY")
     if not api_key:
-        return None
+         raise RuntimeError("Missing OPENAI_API_KEY in .env for OpenRouter")
+         
     if _gpt4o is None:
         _gpt4o = ChatOpenAI(
-            model="gpt-4o",
+            model="openai/gpt-4o",
             api_key=api_key,
+            base_url="https://openrouter.ai/api/v1",
             temperature=0.0,
         )
     return _gpt4o
@@ -171,11 +147,16 @@ def polyglot_translator(state: HikmahState) -> dict:
     """Detect language and produce scholarly Arabic query."""
     llm = _get_primary_llm()
     query = state["original_query"]
+    history = state.get("conversation_history", [])
 
-    response = llm.invoke([
-        SystemMessage(content=TRANSLATOR_SYSTEM),
-        HumanMessage(content=query),
-    ])
+    messages = [SystemMessage(content=TRANSLATOR_SYSTEM)]
+    if history:
+        history_str = "\n".join(f"{h['role']}: {h['content']}" for h in history)
+        messages.append(HumanMessage(content=f"Previous Conversation:\n{history_str}\n\nCurrent Question:\n{query}"))
+    else:
+        messages.append(HumanMessage(content=query))
+
+    response = llm.invoke(messages)
 
     parsed = _parse_json_response(response.content)
     return {
@@ -221,7 +202,7 @@ def researcher_agent(state: HikmahState) -> dict:
 
             genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
             embed_result = genai.embed_content(
-                model="models/text-embedding-004",
+                model="models/gemini-embedding-001",
                 content=arabic_q,
                 task_type="retrieval_query",
             )
@@ -230,16 +211,21 @@ def researcher_agent(state: HikmahState) -> dict:
         except Exception as exc:
             logger.warning("Vectorize query failed, continuing without RAG: %s", exc)
 
+    history = state.get("conversation_history", [])
+    history_context = ""
+    if history:
+         history_context = "السياق السابق:\n" + "\n".join(f"{h['role']}: {h['content']}" for h in history) + "\n\n"
+
     if chunks:
         context_block = "\n\n---\n\n".join(
             f"[{c.get('book', 'مصدر')}  #{c.get('hadith_no', '')}]\n{c.get('text', '')}"
             for c in chunks
         )
-        user_msg = f"السؤال: {arabic_q}\n\nالنصوص المسترجعة:\n{context_block}"
+        user_msg = f"{history_context}السؤال: {arabic_q}\n\nالنصوص المسترجعة:\n{context_block}"
     else:
         logger.info("No Vectorize results — using LLM built-in knowledge")
         user_msg = (
-            f"السؤال: {arabic_q}\n\n"
+            f"{history_context}السؤال: {arabic_q}\n\n"
             "لا توجد نصوص مسترجعة من قاعدة البيانات. "
             "استخدم معرفتك بالأحاديث الصحيحة من البخاري ومسلم وفتح الباري."
         )
@@ -292,16 +278,21 @@ def verifier_agent(state: HikmahState) -> dict:
 
     draft = state["arabic_scholarly_draft"]
     chunks = state.get("authentic_chunks", [])
+    history = state.get("conversation_history", [])
 
     evidence_block = "\n".join(
         f"- [{c.get('book', '')} #{c.get('hadith_no', '')}] {c.get('text_snippet', '')}"
         for c in chunks
     ) or "لا يوجد دليل"
 
+    history_context = ""
+    if history:
+         history_context = "السياق السابق:\n" + "\n".join(f"{h['role']}: {h['content']}" for h in history) + "\n\n"
+
     response = llm.invoke([
         SystemMessage(content=VERIFIER_SYSTEM),
         HumanMessage(
-            content=f"المسودة العلمية:\n{draft}\n\nالأدلة المسترجعة:\n{evidence_block}"
+            content=f"{history_context}المسودة العلمية:\n{draft}\n\nالأدلة المسترجعة:\n{evidence_block}"
         ),
     ])
 
