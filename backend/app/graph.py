@@ -178,8 +178,9 @@ You receive text chunks retrieved from a scholarly database. These chunks may co
 Strict Rules:
 1. **Mirroring**: Present whatever the database says about the text, including its grading.
 2. **Relevance Gateway**: Evaluate if the retrieved chunks directly or indirectly relate to the user's specific query.
-   - Be very lenient. Even if the wording is colloquial (e.g., "makes me crazy" vs "snatched mind"), match it semantically.
-   - If the chunks are COMPLETELY unrelated, you MUST return: `{"error": "NO_DIRECT_MATCH"}`.
+   - CRITICAL: Vector databases often return irrelevant text if the exact answer isn't present.
+   - If the user asks "Who is Allah?" and the chunks are about "The Pillars of Islam" or "Witr Prayer", they are NOT relevant to the specific question.
+   - If the chunks do not directly contain the answer or strong context for the query, you MUST return ONLY: `{"error": "NO_DIRECT_MATCH"}`.
 3. **Drafting**: If relevant, lead with the Arabic evidence text, then explain its meaning and scholarly grading based ONLY on the provided chunks.
 4. **Grading Awareness**: You MUST explicitly identify if a hadith is weak (Da'if) or fabricated (Mawdu') inside your draft. Do not omit the grade.
 5. **JSON Format**: Return ONLY valid JSON:
@@ -369,7 +370,7 @@ Present the primary hadith or Qur'anic evidence. Always include the original Ara
 ## Evidence Translation
 Provide the translation of the primary Arabic evidence text. Use a blockquote.
 ## Explanation
-Provide a clear scholarly explanation in the user's language.
+Provide a clear scholarly explanation EXCLUSIVELY in the user's language ({lang}). Under no circumstances should this section be in Arabic unless the user's language code is 'ar'.
 ## Source
 List all references with book name and hadith number.
 

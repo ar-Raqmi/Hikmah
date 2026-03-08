@@ -538,35 +538,45 @@
         }
 
         m3e-button.consensus-btn-agreed {
-            --m3-button-container-color: #065F46;
-            --m3-button-label-text-color: white;
-            --m3-button-icon-color: white;
+            --m3-button-container-color: #065F46 !important;
+            --md-sys-color-primary: #065F46 !important;
+            --m3-button-label-text-color: white !important;
+            --md-sys-color-on-primary: white !important;
+            --m3-button-icon-color: white !important;
         }
 
         m3e-button.consensus-btn-majority {
-            --m3-button-container-color: #1D4ED8;
-            --m3-button-label-text-color: white;
-            --m3-button-icon-color: white;
+            --m3-button-container-color: #1D4ED8 !important;
+            --md-sys-color-primary: #1D4ED8 !important;
+            --m3-button-label-text-color: white !important;
+            --md-sys-color-on-primary: white !important;
+            --m3-button-icon-color: white !important;
         }
 
         m3e-button.consensus-btn-difference {
-            --m3-button-container-color: #D97706;
-            --m3-button-label-text-color: white;
-            --m3-button-icon-color: white;
+            --m3-button-container-color: #D97706 !important;
+            --md-sys-color-primary: #D97706 !important;
+            --m3-button-label-text-color: white !important;
+            --md-sys-color-on-primary: white !important;
+            --m3-button-icon-color: white !important;
         }
 
         m3e-button.consensus-btn-hasan {
-            --m3-button-container-color: #059669;
+            --m3-button-container-color: #059669 !important;
+            --md-sys-color-primary: #059669 !important;
             /* Slightly lighter emerald */
-            --m3-button-label-text-color: white;
-            --m3-button-icon-color: white;
+            --m3-button-label-text-color: white !important;
+            --md-sys-color-on-primary: white !important;
+            --m3-button-icon-color: white !important;
         }
 
         m3e-button.consensus-btn-weak {
-            --m3-button-container-color: #DC2626;
+            --m3-button-container-color: #DC2626 !important;
+            --md-sys-color-primary: #DC2626 !important;
             /* Red */
-            --m3-button-label-text-color: white;
-            --m3-button-icon-color: white;
+            --m3-button-label-text-color: white !important;
+            --md-sys-color-on-primary: white !important;
+            --m3-button-icon-color: white !important;
         }
 
         /* ===== GRADE LEGEND ===== */
@@ -1324,7 +1334,7 @@
                 }, 1500);
 
                 try {
-                    const resp = await fetch(`${API_BASE}/ask`, {
+                    const resp = await fetch(`${API_BASE}/ask/stream`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1333,81 +1343,117 @@
                         }),
                     });
 
-                    clearInterval(stageTimer);
-                    if (thinkingContainer) thinkingContainer.classList.add('hidden');
-
                     if (!resp.ok) {
+                        clearInterval(stageTimer);
+                        if (thinkingContainer) thinkingContainer.classList.add('hidden');
                         const errData = await resp.json().catch(() => ({}));
                         throw new Error(errData.detail || `Server error: ${resp.status}`);
                     }
-                    const data = await resp.json();
 
-                    // Enforce Amanah Score Threshold (Faithfulness check)
-                    const score = data.amanah_score !== undefined ? data.amanah_score : 100;
+                    const reader = resp.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let buffer = "";
+                    let done = false;
 
-                    if (data.is_fallback) {
-                        const fallbackText = data.answer || "I could not find a verified answer with high confidence in the sources.";
+                    while (!done) {
+                        const { value, done: doneReading } = await reader.read();
+                        done = doneReading;
 
-                        if (isFollowUp) {
-                            conversationHistory.push({ role: 'user', content: query });
-                            conversationHistory.push({
-                                role: 'assistant',
-                                content: fallbackText,
-                                is_fallback: true
-                            });
-                            renderConversationThread();
-                            show('success');
+                        if (value) {
+                            buffer += decoder.decode(value, { stream: true });
+                            let messages = buffer.split("\n\n");
+                            // The last element is either an empty string (if ends with \n\n) or an incomplete chunk
+                            buffer = messages.pop();
 
-                            document.getElementById('reset-btn-container').classList.remove('hidden');
-                            input.placeholder = "Ask a follow-up...";
-                            input.value = '';
+                            for (let message of messages) {
+                                if (message.startsWith("data: ")) {
+                                    const dataStr = message.substring(6);
+                                    if (!dataStr) continue;
 
-                            setTimeout(() => {
-                                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                            }, 100);
-                        } else {
-                            const fallbackMsg = document.getElementById('fallback-message');
-                            if (fallbackMsg) {
-                                fallbackMsg.innerHTML = renderAnswer(fallbackText);
+                                    try {
+                                        const event = JSON.parse(dataStr);
+
+                                        if (event.type === "status") {
+                                            clearInterval(stageTimer); // stop fake timer
+                                            statusElement.innerText = event.status;
+                                        }
+                                        else if (event.type === "error") {
+                                            throw new Error(event.detail);
+                                        }
+                                        else if (event.type === "result") {
+                                            // Got the final response!
+                                            clearInterval(stageTimer);
+                                            if (thinkingContainer) thinkingContainer.classList.add('hidden');
+
+                                            const data = event;
+                                            const score = data.amanah_score !== undefined ? data.amanah_score : 100;
+
+                                            if (data.is_fallback) {
+                                                const fallbackText = data.answer || "I could not find a verified answer with high confidence in the sources.";
+
+                                                if (isFollowUp) {
+                                                    conversationHistory.push({ role: 'user', content: query });
+                                                    conversationHistory.push({
+                                                        role: 'assistant',
+                                                        content: fallbackText,
+                                                        is_fallback: true
+                                                    });
+                                                    renderConversationThread();
+                                                    show('success');
+                                                } else {
+                                                    const fallbackMsg = document.getElementById('fallback-message');
+                                                    if (fallbackMsg) {
+                                                        fallbackMsg.innerHTML = renderAnswer(fallbackText);
+                                                    }
+                                                    conversationHistory.push({ role: 'user', content: query });
+                                                    conversationHistory.push({ role: 'assistant', content: fallbackText, is_fallback: true });
+                                                    show('fallback');
+                                                }
+                                                document.getElementById('reset-btn-container').classList.remove('hidden');
+                                                input.placeholder = isFollowUp ? "Ask a follow-up..." : "Ask a follow-up or start new topic...";
+                                                input.value = '';
+
+                                                setTimeout(() => {
+                                                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                                                }, 100);
+                                                return; // Stop processing further chunks
+                                            }
+
+                                            // Update history with full response context (Success State)
+                                            conversationHistory.push({ role: 'user', content: query });
+                                            conversationHistory.push({
+                                                role: 'assistant',
+                                                content: data.answer,
+                                                arabic_query: data.arabic_query,
+                                                arabic_draft: data.arabic_draft,
+                                                amanah_score: score,
+                                                consensus_level: data.consensus_level || 'unknown',
+                                                sources: data.sources || [],
+                                                verification_notes: data.verification_notes,
+                                                verification_notes_translation: data.verification_notes_translation
+                                            });
+
+                                            // Direct answering: Re-render the thread with full cards
+                                            renderConversationThread();
+                                            show('success');
+
+                                            document.getElementById('reset-btn-container').classList.remove('hidden');
+                                            input.placeholder = "Ask a follow-up...";
+                                            input.value = '';
+
+                                            setTimeout(() => {
+                                                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                                            }, 100);
+                                            return; // Stop processing further chunks
+                                        }
+                                    } catch (e) {
+                                        // Ignore parse errors on incomplete JSON and continue reading the stream
+                                        console.warn("Stream JSON parsing error", e);
+                                    }
+                                }
                             }
-                            // Initialize history so reset button works and we can append further
-                            conversationHistory.push({ role: 'user', content: query });
-                            conversationHistory.push({ role: 'assistant', content: fallbackText, is_fallback: true });
-
-                            document.getElementById('reset-btn-container').classList.remove('hidden');
-                            input.placeholder = "Ask a follow-up or start new topic...";
-                            input.value = '';
-
-                            show('fallback');
                         }
-                        return;
                     }
-
-                    // Update history with full response context (Success State)
-                    conversationHistory.push({ role: 'user', content: query });
-                    conversationHistory.push({
-                        role: 'assistant',
-                        content: data.answer,
-                        arabic_query: data.arabic_query,
-                        arabic_draft: data.arabic_draft,
-                        amanah_score: score,
-                        consensus_level: data.consensus_level || 'unknown',
-                        sources: data.sources || [],
-                        verification_notes: data.verification_notes,
-                        verification_notes_translation: data.verification_notes_translation
-                    });
-
-                    // Direct answering: Re-render the thread with full cards
-                    renderConversationThread();
-                    show('success');
-
-                    document.getElementById('reset-btn-container').classList.remove('hidden');
-                    input.placeholder = "Ask a follow-up...";
-                    input.value = '';
-
-                    setTimeout(() => {
-                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                    }, 100);
 
                 } catch (err) {
                     clearInterval(stageTimer);

@@ -12,10 +12,12 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from .graph import build_graph
 from .schemas import AskRequest, AskResponse, SourceReference
+from .stream import stream_ask
 
 load_dotenv(override=True)
 
@@ -116,6 +118,18 @@ async def ask(req: AskRequest):
         is_fallback=is_fallback,
         arabic_draft=result.get("arabic_scholarly_draft", ""),
         arabic_query=result.get("arabic_query", ""),
-        verification_notes=result.get("verification_notes", ""),
         verification_notes_translation=result.get("verification_notes_translation", ""),
+    )
+
+
+@app.post("/ask/stream")
+async def ask_stream(req: AskRequest):
+    """Run the multi-agent pipeline and stream progress updates to the client."""
+    logger.info("Received streaming query: %s", req.query[:80])
+    
+    history_dicts = [{"role": h.role, "content": h.content} for h in req.history]
+    
+    return StreamingResponse(
+        stream_ask(req.query, history_dicts),
+        media_type="text/event-stream"
     )
