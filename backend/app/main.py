@@ -93,6 +93,8 @@ async def ask(req: AskRequest):
         raise HTTPException(status_code=500, detail=err_str) from exc
 
     amanah_score = result.get("amanah_score", 0)
+    # The frontend only sees fallback if the AI scored < 85 in faithfulness
+    # (i.e. it hallucinated or the database found NO matches)
     is_fallback = amanah_score < 85
 
     sources = [
@@ -100,6 +102,7 @@ async def ask(req: AskRequest):
             book=s.get("book", ""),
             hadith_no=str(s.get("hadith_no", "")),
             text_snippet=s.get("text_snippet", ""),
+            translation_snippet=s.get("translation_snippet", ""),
         )
         for s in result.get("authentic_chunks", [])
     ]
@@ -108,9 +111,11 @@ async def ask(req: AskRequest):
         answer=result.get("final_native_answer", ""),
         source_language=result.get("input_language", ""),
         amanah_score=amanah_score,
+        consensus_level=result.get("consensus_level", "unknown"),
         sources=sources,
         is_fallback=is_fallback,
         arabic_draft=result.get("arabic_scholarly_draft", ""),
         arabic_query=result.get("arabic_query", ""),
         verification_notes=result.get("verification_notes", ""),
+        verification_notes_translation=result.get("verification_notes_translation", ""),
     )

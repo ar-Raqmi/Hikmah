@@ -1,0 +1,45 @@
+Invoking /ask endpoint...
+STATUS: 200
+{
+  "answer": "## Evidence\nحديث (اختلاف أمتي رحمة) هو حديث موضوع، حيث قال ابن حزم: \"هذا من أفسد قول يكون، لأنه لو كان الاختلاف رحمة لكان الاتفاق سخطاً\". وأكد الألباني أنه لا أصل له، وذكر السبكي أنه لم يقف له على سند صحيح ولا ضعيف ولا موضوع. لذلك، يُعتبر هذا الحديث ضعيفاً جداً ولا يُعتمد عليه في الأمور الشرعية.\n\n## Evidence Translation\n> The hadith (The disagreement of my Ummah is a mercy) is a fabricated hadith. Ibn Hazm said: \"This is one of the most corrupt statements, for if disagreement were a mercy, then agreement would be a wrath.\" Al-Albani confirmed that it has no basis, and Al-Subki mentioned that he found no authentic, weak, or fabricated chain for it. Therefore, this hadith is considered very weak and is not relied upon in legal matters.\n\n## Explanation\nThe hadith in question, which claims that the disagreement among the Muslim community is a form of mercy, has been thoroughly critiqued by scholars. Ibn Hazm categorically rejected it, arguing that if disagreement were indeed a mercy, then consensus would be viewed as a form of divine displeasure. Al-Albani and Al-Subki further supported this view by stating that there is no authentic chain of narration for this hadith, rendering it unreliable for legal rulings. Thus, it is important for scholars and followers alike to be cautious about relying on such narrations in matters of Islamic jurisprudence.\n\n## Source\n1. ابن حزم، \"الفصل في الملل والنحل\".\n2. الألباني، \"سلسلة الأحاديث الضعيفة\".\n3. السبكي، \"طبقات الشافعية\".",
+  "source_language": "en",
+  "amanah_score": 100,
+  "consensus_level": "weak_fabricated",
+  "sources": [
+    {
+      "book": "Al-Mawdu'at",
+      "hadith_no": "",
+      "text_snippet": "الحديث: (اختلاف أمتي رحمة). قال ابن حزم: هذا من أفسد قول يكون، لأنه لو كان الاختلاف رحمة لكان الاتفاق سخطاً. وقال الألباني: لا أصل له، وذكره السبكي وقال: لم أقف له على سند صحيح ولا ضعيف ولا موضوع.",
+      "translation_snippet": "The hadith: (The disagreement of my Ummah is a mercy). Ibn Hazm said: This is one of the most corrupt statements, for if disagreement were a mercy, then agreement would be a wrath. Al-Albani said: It has no basis, and Al-Subki mentioned: I found no authentic, weak, or fabricated chain for it."
+    },
+    {
+      "book": "Al-Mawdu'at",
+      "hadith_no": "",
+      "text_snippet": "الحديث: (اختلاف أمتي رحمة). قال ابن حزم: هذا من أفسد قول يكون، لأنه لو كان الاختلاف رحمة لكان الاتفاق سخطاً. وقال الألباني: لا أصل له، وذكره السبكي وقال: لم أقف له على سند صحيح ولا ضعيف ولا موضوع.",
+      "translation_snippet": "The hadith: (The disagreement of my Ummah is a mercy). Ibn Hazm said: This is one of the most corrupt statements, for if disagreement were a mercy, then agreement would be a wrath. Al-Albani said: It has no basis, and Al-Subki mentioned: I found no authentic, weak, or fabricated chain for it."
+    },
+    {
+      "book": "Jami' at-Tirmidhi",
+      "hadith_no": "",
+      "text_snippet": "حَدَّثَنَا قُتَيْبَةُ، قَالَ حَدَّثَنَا جَعْفَرُ بْنُ سُلَيْمَانَ، عَنْ أَبِي تَارِقٍ، عَنِ الْحَسَنِ، عَنْ أَبِي هُرَيْرَةَ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ مَنْ حُسْنِ إِسْلاَمِ الْمَرْءِ تَرْكُهُ مَا لاَ يَعْنِيهِ ‏\"‏ ‏.‏ قَالَ أَبُو عِيسَى هَذَا حَدِيثٌ غَرِيبٌ لاَ نَعْرِفُهُ مِنْ حَدِيثِ أَبِي سَلَمَةَ عَنْ أَبِي هُرَيْرَةَ عَنِ النَّبِيِّ صلى الله عليه وسلم إِلاَّ مِنْ هَذَا الْوَجْهِ ‏.‏ قَالَ وَأَبُو تَارِقٍ رَجُلٌ مَجْهُولٌ ‏.‏ وفي الباب عن علي بن الحسين. وقد روى مالك بن أنس هذا الحديث عن الزهري عن علي بن الحسين عن النبي صلى الله عليه وسلم مرسلا وهو أصح من حديث أبي سلمة عن أبي هريرة. وقال ابن عبد البر: حديث حسن.",
+      "translation_snippet": "Qutaiba narrated to us, he said: Ja'far ibn Sulayman narrated to us, from Abu Tariq, from Al-Hasan, from Abu Huraira, who said: The Messenger of Allah (peace be upon him) said: \"Among the goodness of a person's Islam is leaving that which does not concern him.\" Abu 'Isa said: This is a strange hadith; we do not know it from the narration of Abu Salamah from Abu Huraira about the Prophet (peace be upon him) except from this source. He said: And Abu Tariq is an unknown man. There is also a narration from Ali ibn Al-Husayn. Malik ibn Anas narrated this hadith from Al-Zuhri from Ali ibn Al-Husayn from the Prophet (peace be upon him) as a mursal narration, which is more authentic than the hadith of Abu Salamah from Abu Huraira. Ibn 'Abd al-Barr said: It is a good hadith."
+    },
+    {
+      "book": "Jami' at-Tirmidhi",
+      "hadith_no": "",
+      "text_snippet": "حَدَّثَنَا قُتَيْبَةُ، قَالَ حَدَّثَنَا جَعْفَرُ بْنُ سُلَيْمَانَ، عَنْ أَبِي تَارِقٍ، عَنِ الْحَسَنِ، عَنْ أَبِي هُرَيْرَةَ، قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم ‏ \"‏ مَنْ حُسْنِ إِسْلاَمِ الْمَرْءِ تَرْكُهُ مَا لاَ يَعْنِيهِ ‏\"‏ ‏.‏ قَالَ أَبُو عِيسَى هَذَا حَدِيثٌ غَرِيبٌ لاَ نَعْرِفُهُ مِنْ حَدِيثِ أَبِي سَلَمَةَ عَنْ أَبِي هُرَيْرَةَ عَنِ النَّبِيِّ صلى الله عليه وسلم إِلاَّ مِنْ هَذَا الْوَجْهِ ‏.‏ قَالَ وَأَبُو تَارِقٍ رَجُلٌ مَجْهُولٌ ‏.‏ وفي الباب عن علي بن الحسين. وقد روى مالك بن أنس هذا الحديث عن الزهري عن علي بن الحسين عن النبي صلى الله عليه وسلم مرسلا وهو أصح من حديث أبي سلمة عن أبي هريرة. وقال ابن عبد البر: حديث حسن.",
+      "translation_snippet": "Qutaiba narrated to us, he said: Ja'far ibn Sulayman narrated to us, from Abu Tariq, from Al-Hasan, from Abu Huraira, who said: The Messenger of Allah (peace be upon him) said: \"Among the goodness of a person's Islam is leaving that which does not concern him.\" Abu 'Isa said: This is a strange hadith; we do not know it from the narration of Abu Salamah from Abu Huraira about the Prophet (peace be upon him) except from this source. He said: And Abu Tariq is an unknown man. There is also a narration from Ali ibn Al-Husayn. Malik ibn Anas narrated this hadith from Al-Zuhri from Ali ibn Al-Husayn from the Prophet (peace be upon him) as a mursal narration, which is more authentic than the hadith of Abu Salamah from Abu Huraira. Ibn 'Abd al-Barr said: It is a good hadith."
+    },
+    {
+      "book": "Majmoo' al-Fatawa",
+      "hadith_no": "",
+      "text_snippet": "مسألة الفاتحة خلف الإمام: تنازع العلماء فيها على ثلاثة أقوال: قيل: تجب قراءتها على المأموم مطلقاً كقول الشافعي في الجديد. وقيل: لا تجب ولا تستحب، بل تكره كقول أبي حنيفة. وقيل: يقرأ بها في السرية دون الجهرية، وهذا قول مالك وأحمد بن حنبل والجمهور وهو الأعدل.",
+      "translation_snippet": "The issue of reciting Al-Fatiha behind the Imam: Scholars have disagreed on three opinions: It is said that it is obligatory for the follower to recite it in all cases, as stated by Al-Shafi'i in his new opinion. It is said that it is neither obligatory nor recommended, but rather disliked, as stated by Abu Hanifa. It is said that it should be recited in silent prayers but not in loud prayers, which is the opinion of Malik, Ahmad ibn Hanbal, and the majority, and this is the most just opinion."
+    }
+  ],
+  "is_fallback": false,
+  "arabic_draft": "حديث (اختلاف أمتي رحمة) هو حديث موضوع، حيث قال ابن حزم: \"هذا من أفسد قول يكون، لأنه لو كان الاختلاف رحمة لكان الاتفاق سخطاً\". وأكد الألباني أنه لا أصل له، وذكر السبكي أنه لم يقف له على سند صحيح ولا ضعيف ولا موضوع. لذلك، يُعتبر هذا الحديث ضعيفاً جداً ولا يُعتمد عليه في الأمور الشرعية.",
+  "arabic_query": "اختلاف الآراء رحمة",
+  "verification_notes": "الحديث (اختلاف أمتي رحمة) هو حديث موضوع كما ذكر ابن حزم والألباني والسبكي. ابن حزم اعتبره من أفسد الأقوال، والألباني قال إنه لا أصل له، والسبكي لم يجد له سنداً صحيحاً أو ضعيفاً أو موضوعاً. لذلك، يُعتبر هذا الحديث ضعيفاً جداً ولا يُعتمد عليه في الأمور الشرعية.",
+  "verification_notes_translation": "The hadith (The disagreement of my Ummah is a mercy) is a fabricated hadith as mentioned by Ibn Hazm, Al-Albani, and Al-Subki. Ibn Hazm considered it one of the most corrupt statements, Al-Albani said it has no basis, and Al-Subki found no authentic, weak, or fabricated chain for it. Therefore, this hadith is considered very weak and is not relied upon in legal matters."
+}

@@ -134,7 +134,8 @@ TRANSLATOR_SYSTEM = """\
 You are a scholarly Islamic translation engine.
 
 Given a user question in ANY language, you MUST:
-1. Detect the source language and return its ISO 639-1 code.
+1. Detect the source language of the *user's question* and return its ISO 639-1 code (e.g., 'en' for English, 'fr' for French).
+   - CRITICAL: If the language is ambiguous, or if it is a short phrase that could be English, DEFAULT TO 'en' (English). 
 2. Translate the question into precise Classical Arabic suitable for searching
    hadith and fiqh databases. Preserve the scholarly nuance.
 
@@ -170,21 +171,21 @@ def polyglot_translator(state: HikmahState) -> dict:
 # ---------------------------------------------------------------------------
 
 RESEARCHER_SYSTEM = """\
-You are an evidence-first Islamic researcher.
+You are an evidence-first Islamic investigator.
 
-You may receive hadith chunks retrieved from a scholarly database. If chunks
-are provided, use them as primary evidence. If NO chunks are available, draw
-from your trained knowledge of authentic (Sahih) hadith collections.
+You receive text chunks retrieved from a scholarly database. These chunks may contain Sahih, Hasan, Da'if, or even Mawdu' (Fabricated) reports, along with what scholars said about them.
 
-Rules:
-- Cite ONLY Sahih (authentic) hadith — Bukhari, Muslim, or major scholarly
-  consensus (e.g. Fath al-Bari by Ibn Hajar).
-- Structure your answer as a "Dalil-First" draft: lead with the Arabic
-  evidence text, then provide scholarly explanation.
-- If no authentic evidence is available, state: "لم أجد دليلاً صحيحاً"
-- Write entirely in Classical Arabic.
-- Return ONLY valid JSON:
+Strict Rules:
+1. **Mirroring**: Present whatever the database says about the text, including its grading.
+2. **Relevance Gateway**: Evaluate if the retrieved chunks directly or indirectly relate to the user's specific query.
+   - Be very lenient. Even if the wording is colloquial (e.g., "makes me crazy" vs "snatched mind"), match it semantically.
+   - If the chunks are COMPLETELY unrelated, you MUST return: `{"error": "NO_DIRECT_MATCH"}`.
+3. **Drafting**: If relevant, lead with the Arabic evidence text, then explain its meaning and scholarly grading based ONLY on the provided chunks.
+4. **Grading Awareness**: You MUST explicitly identify if a hadith is weak (Da'if) or fabricated (Mawdu') inside your draft. Do not omit the grade.
+5. **JSON Format**: Return ONLY valid JSON:
   {"draft": "<arabic scholarly draft>", "sources": [{"book": "...", "hadith_no": "...", "text_snippet": "..."}]}
+  OR
+  {"error": "NO_DIRECT_MATCH"}
 """
 
 
@@ -199,7 +200,7 @@ def researcher_agent(state: HikmahState) -> dict:
     if vc._account_id and vc._api_token:
         try:
             import google.generativeai as genai
-
+            logger.info("RAG search query (Arabic): %s", arabic_q)
             genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
             embed_result = genai.embed_content(
                 model="models/gemini-embedding-001",
@@ -209,6 +210,11 @@ def researcher_agent(state: HikmahState) -> dict:
             )
             query_vector = embed_result["embedding"]
             chunks = vc.query(vector=query_vector, top_k=5)
+            if chunks:
+                logger.info("Retrieved %d relevant chunks from database.", len(chunks))
+                for i, c in enumerate(chunks):
+                    meta = c.get('metadata', {})
+                    logger.info("  Chunk %d: %s (Book: %s, Author: %s)", i+1, c['id'], meta.get('book', 'Unknown'), meta.get('author', 'Unknown'))
         except Exception as exc:
             logger.warning("Vectorize query failed, continuing without RAG: %s", exc)
 
@@ -218,13 +224,34 @@ def researcher_agent(state: HikmahState) -> dict:
          history_context = "السياق السابق:\n" + "\n".join(f"{h['role']}: {h['content']}" for h in history) + "\n\n"
 
     if chunks:
-        context_block = "\n\n---\n\n".join(
-            f"[{c.get('book', 'مصدر')}  #{c.get('hadith_no', '')}]\n{c.get('text', '')}"
-            for c in chunks
-        )
+        context_items = []
+        state_chunks = []
+        for c in chunks:
+            m = c.get("metadata", {})
+            text = m.get("text") or m.get("content") or ""
+            book = m.get("book") or "مصدر"
+            author = m.get("author") or ""
+            grade = m.get("grade") or "ungraded"
+            src_type = m.get("type") or "hadith"
+            
+            info = f"[{book} - {author}] (Grade: {grade}, Type: {src_type})"
+            context_items.append(f"{info}\n{text}")
+            
+            # Store full metadata for the Verifier to see later
+            state_chunks.append({
+                "book": book,
+                "author": author,
+                "grade": grade,
+                "type": src_type,
+                "text_snippet": text,
+                "hadith_no": m.get("hadith_no", "")
+            })
+            
+        context_block = "\n\n---\n\n".join(context_items)
         user_msg = f"{history_context}السؤال: {arabic_q}\n\nالنصوص المسترجعة:\n{context_block}"
     else:
         logger.info("No Vectorize results — using LLM built-in knowledge")
+        state_chunks = []
         user_msg = (
             f"{history_context}السؤال: {arabic_q}\n\n"
             "لا توجد نصوص مسترجعة من قاعدة البيانات. "
@@ -237,9 +264,17 @@ def researcher_agent(state: HikmahState) -> dict:
     ])
 
     parsed = _parse_json_response(response.content)
+    if parsed.get("error") == "NO_DIRECT_MATCH":
+        return {
+            "authentic_chunks": [],
+            "arabic_scholarly_draft": "NO_DIRECT_MATCH",
+        }
+
+    # If the researcher provided specific sources in its JSON, we can use those too, 
+    # but primarily we want the raw chunks we found in the database.
     return {
-        "authentic_chunks": parsed.get("sources", []),
-        "arabic_scholarly_draft": parsed["draft"],
+        "authentic_chunks": state_chunks,
+        "arabic_scholarly_draft": parsed.get("draft", ""),
     }
 
 
@@ -249,25 +284,26 @@ def researcher_agent(state: HikmahState) -> dict:
 
 VERIFIER_SYSTEM = """\
 You are The Verifier — an independent auditor of Islamic scholarly AI output.
-You perform the "Antigravity Audit": checking that every claim is grounded
-in Sahih evidence and free from:
-  • Isra'iliyyat (Judeo-Christian narrations without Islamic basis)
-  • Weak (Da'if) or fabricated (Mawdu') narrations
-  • Logical gaps or unsupported jumps in reasoning
+You perform the "Antigravity Audit": evaluating the "Amanah" (Faithfulness & Certainty) of the AI's draft compared to the raw evidence chunks.
 
-You receive the scholarly Arabic draft and the raw evidence chunks.
-
-Return ONLY valid JSON — no markdown:
+Strict Rules:
+1. **Relevance Check**: If the Researcher Agent output "NO_DIRECT_MATCH", you MUST return an `amanah_score` of **0**.
+2. **Amanah Scoring (Faithfulness)**: Your score (0-100) reflects the **faithfulness** of the AI draft to the provided chunks. If the chunks say a hadith is fabricated, and the AI correctly reports it as fabricated, the Amanah score should be 100. Do NOT punish the AI's Amanah score for correctly reporting weak hadiths.
+3. **Draft Accuracy**:
+    - If the AI hallucinates details, contradicts the chunks, or fails to warn about a Da'if/Mawdu' hadith when the chunks explicitly say it is weak, drop the Amanah score below 85.
+4. **Consensus Level**: Separate from Amanah, you must determine the actual scholarly grading/consensus of the topic based on the sources. Choose EXACTLY ONE of the following:
+    - `agreed_upon`: Verbatim foundational texts from Sahihayn (Bukhari/Muslim) or explicit consensus (Ijma').
+    - `majority`: Strong majority opinion (Jumhur) without significant valid counter-evidence.
+    - `khilaf`: Significant scholarly dispute with valid evidence on multiple sides (Valid Difference).
+    - `hasan_acceptable`: Generally accepted or Hasan rating, but not reaching agreed upon status.
+    - `weak_fabricated`: The sources explicitly state the hadith/claim is Da'if (Weak) or Mawdu' (Fabricated).
+    - `unknown`: No clear grading can be established.
+5. **JSON Format**: Return ONLY valid JSON:
 {
   "amanah_score": <integer 0-100>,
-  "notes": "<Arabic notes on any issues found or confirmation of integrity>"
+  "consensus_level": "<one of the exact strings from rule 4>",
+  "notes": "<Arabic notes explaining the scholarly consensus level and why this score was given>"
 }
-
-Scoring guide:
-  90-100 — All claims backed by Sahih with clear isnad references
-  75-89  — Mostly sound, minor gaps in citation precision
-  50-74  — Significant reliance on unverified or weak material
-  0-49   — Major integrity failures: fabricated hadith or Isra'iliyyat detected
 """
 
 
@@ -299,7 +335,8 @@ def verifier_agent(state: HikmahState) -> dict:
 
     parsed = _parse_json_response(response.content)
     return {
-        "amanah_score": int(parsed["amanah_score"]),
+        "amanah_score": int(parsed.get("amanah_score", 0)),
+        "consensus_level": parsed.get("consensus_level", "unknown"),
         "verification_notes": parsed.get("notes", ""),
     }
 
@@ -314,43 +351,48 @@ You are the Global Spokesperson for "Hikmah", an Islamic knowledge system.
 You receive:
 - A verified scholarly Arabic draft.
 - The user's original language code.
+- A list of raw Arabic evidence snippets from the sources.
 
 Your job:
 1. Translate the Arabic draft into the user's language with scholarly dignity.
-2. Preserve all hadith citations (book + number) in their original Arabic form.
-3. Keep the tone accessible yet respectful.
-4. Format the answer with clear Markdown sections using ## headings:
+2. **Friendly Disclaimer**: Check if the Arabic draft starts with the marker `[[تنبيه: لا توجد إجابة مباشرة]]`.
+   - If YES: Start your answer with this exact sentence (translated to user's language): "After researching the available archives, I found no direct answer to your specific question. However, I found the following scholarly evidence that may be of benefit:"
+   - If NO: Proceed without a disclaimer.
+3. **Evidence Translation**: In your main answer, provide a dedicated "Translated Evidence" section.
+   - Look for the primary Arabic Hadith or Ayah in the draft and provide a faithful, precise translation of it.
+4. **Source Snippet Translation**: For EACH of the provided raw Arabic evidence snippets, provide a FULL AND COMPLETE translation in the user's language. DO NOT use ellipses (`...`) or truncate the translation. Even if the source Arabic text is truncated or incomplete, translate what is there and simply end the sentence without adding trailing dots or ellipses.
+6. **Verification Notes Translation**: Translate the provided raw Arabic verifier notes into the user's language.
+7. Format the MAIN answer with clear Markdown sections using ## headings:
 
 ## Evidence
-Present the primary hadith or Qur'anic evidence. Always include the original Arabic text of the hadith/ayah.
-Mention the source grading when known (e.g. **Sahih** — Authentic, **Hasan** — Good, **Da'if** — Weak).
-
+Present the primary hadith or Qur'anic evidence. Always include the original Arabic text.
+## Evidence Translation
+Provide the translation of the primary Arabic evidence text. Use a blockquote.
 ## Explanation
 Provide a clear scholarly explanation in the user's language.
-Break down complex concepts into digestible points using bullet lists if helpful.
-
 ## Source
 List all references with book name and hadith number.
-Include chain of narration information if available.
 
-Additional rules:
-- Use **bold** for key terms and hadith gradings.
-- Use *italic* for transliterations of Arabic terms.
-- Use > blockquotes for direct hadith text translations.
-- Always keep the original Arabic hadith text in Arabic script — do NOT transliterate it.
-- If the source is from Sahih Bukhari or Sahih Muslim, explicitly note it as **Sahih** (Authentic).
-- If there are known issues with any narration, mention the grade (Da'if, Mawdu', Isra'iliyyat).
-
-Return the final answer as Markdown text (not JSON). Use the user's language.
+Return ALWAYS valid JSON:
+{
+  "answer": "<The full markdown response with headers and sections>",
+  "source_translations": ["translation of snippet 1", "translation of snippet 2", ...],
+  "verification_translation": "<concise translation of the verifier notes>"
+}
 """
 
 
 def global_spokesperson(state: HikmahState) -> dict:
-    """Translate verified Arabic → user's native language."""
+    """Translate verified Arabic → user's native language and source snippets."""
     llm = _get_primary_llm()
     lang = state.get("input_language", "en")
     draft = state["arabic_scholarly_draft"]
     notes = state.get("verification_notes", "")
+    chunks = state.get("authentic_chunks", [])
+
+    # Prepare snippets for targeted translation
+    snippets = [c.get("text_snippet", "") for c in chunks]
+    snippets_str = "\n".join([f"{i+1}. {s}" for i, s in enumerate(snippets)])
 
     response = llm.invoke([
         SystemMessage(content=SPOKESPERSON_SYSTEM),
@@ -358,12 +400,27 @@ def global_spokesperson(state: HikmahState) -> dict:
             content=(
                 f"Target language: {lang}\n"
                 f"Verified Arabic draft:\n{draft}\n"
-                f"Verifier notes:\n{notes}"
+                f"Verifier notes:\n{notes}\n"
+                f"Raw original snippets to translate:\n{snippets_str}"
             )
         ),
     ])
 
-    return {"final_native_answer": response.content.strip()}
+    parsed = _parse_json_response(response.content)
+    answer = parsed.get("answer", response.content)
+    translations = parsed.get("source_translations", [])
+    ver_trans = parsed.get("verification_translation", "")
+
+    # Update chunks with translations for the final response
+    for i, trans in enumerate(translations):
+        if i < len(chunks):
+            chunks[i]["translation_snippet"] = trans
+
+    return {
+        "final_native_answer": answer,
+        "authentic_chunks": chunks,
+        "verification_notes_translation": ver_trans,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -372,31 +429,28 @@ def global_spokesperson(state: HikmahState) -> dict:
 
 WALLAHU_ALAM_MESSAGES: dict[str, str] = {
     "ja": (
-        "والله أعلم\n\n"
         "現在の信頼できる典拠では、この質問に必要な精度で"
         "お答えすることができません。資格のある学者にご相談ください。"
     ),
     "de": (
-        "والله أعلم\n\n"
         "Die verfügbaren authentischen Quellen beantworten diese Frage "
         "nicht mit der erforderlichen Genauigkeit. Bitte konsultieren "
         "Sie einen qualifizierten Gelehrten."
     ),
     "it": (
-        "والله أعلم\n\n"
         "Le fonti autentiche disponibili non rispondono a questa domanda "
         "con la precisione richiesta. Si prega di consultare uno studioso "
         "qualificato."
     ),
     "ar": (
-        "والله أعلم\n\n"
         "لم تتوفر أدلة صحيحة كافية للإجابة على هذا السؤال بالدقة المطلوبة. "
         "يُرجى الرجوع إلى أهل العلم."
     ),
     "en": (
-        "والله أعلم — And Allah knows best.\n\n"
-        "The available authentic sources do not conclusively answer this "
-        "question with the precision required. Please consult a qualified scholar."
+        "At this moment, my library of classical scholarly texts does not contain "
+        "a direct answer to your specific query with the required precision. "
+        "We are currently expanding our archives to include more verified sources. "
+        "Please consult a qualified scholar for urgent matters."
     ),
 }
 
@@ -415,12 +469,13 @@ def wallahu_alam(state: HikmahState) -> dict:
 # ---------------------------------------------------------------------------
 
 def amanah_router(state: HikmahState) -> str:
-    """Route based on amanah_score: ≥ 85 → spokesperson, < 85 → fallback."""
+    """Route based on amanah_score: >= 85 → spokesperson, < 85 → fallback."""
     score = state.get("amanah_score", 0)
+    # If a score >= 85 is achieved, the AI faithfully represented the sources.
     if score >= 85:
-        logger.info("Amanah score %d ≥ 85 → global_spokesperson", score)
+        logger.info("Amanah score %d >= 85 → global_spokesperson", score)
         return "pass"
-    logger.warning("Amanah score %d < 85 → wallahu_alam", score)
+    logger.warning("Amanah score %d < 85 → wallahu_alam (AI failed faithfulness)", score)
     return "fail"
 
 

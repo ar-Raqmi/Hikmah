@@ -35,7 +35,9 @@ class HikmahState(TypedDict, total=False):
 
     # — Set by verifier_agent —
     amanah_score: int  # 0–100 AI faithfulness score (NOT source grading)
+    consensus_level: str # 'agreed_upon', 'majority', 'khilaf', 'hasan_acceptable', 'weak_fabricated', 'unknown'
     verification_notes: str  # Auditor remarks (Arabic)
+    verification_notes_translation: str  # Translation of auditor remarks
 
     # — Set by global_spokesperson OR wallahu_alam —
     final_native_answer: str
@@ -77,6 +79,7 @@ class SourceReference(BaseModel):
     book: str = Field(..., description="Book title (e.g. صحيح البخاري)")
     hadith_no: str = Field("", description="Hadith or section number")
     text_snippet: str = Field("", description="Short Arabic excerpt")
+    translation_snippet: str = Field("", description="Translation of the excerpt in user's language")
 
 
 class AskResponse(BaseModel):
@@ -85,6 +88,7 @@ class AskResponse(BaseModel):
     answer: str = Field(..., description="Answer in the user's native language")
     source_language: str = Field(..., description="Detected input language (ISO 639-1)")
     amanah_score: int = Field(..., ge=0, le=100, description="Integrity score 0–100")
+    consensus_level: str = Field("unknown", description="Scholarly grading level")
     sources: list[SourceReference] = Field(default_factory=list)
     is_fallback: bool = Field(
         False,
@@ -93,3 +97,4 @@ class AskResponse(BaseModel):
     arabic_draft: str = Field("", description="Original Arabic scholarly draft")
     arabic_query: str = Field("", description="Scholarly Arabic translation of the user query")
     verification_notes: str = Field("", description="Verifier audit remarks")
+    verification_notes_translation: str = Field("", description="Translation of verifier audit remarks")

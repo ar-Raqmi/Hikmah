@@ -77,6 +77,19 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* Tiny tweaks for Arabic symbols inside English sentences */
+        .arabic-inline {
+            font-family: "Segoe UI", "Tahoma", "Arial", sans-serif !important;
+            font-style: normal !important;
+            font-weight: normal !important;
+            line-height: 1.2 !important;
+            font-size: 1.15em;
+            vertical-align: -0.1em;
+            display: inline-block;
+            margin: 0 0.1em;
+            word-spacing: normal;
+        }
+
         .font-serif {
             font-family: 'Crimson Pro', Georgia, serif;
         }
@@ -367,6 +380,41 @@
             flex-shrink: 0;
         }
 
+        /* Translated Evidence Styling */
+        .translated-evidence-box {
+            background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+            border-left: 4px solid var(--emerald);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .translated-evidence-box blockquote {
+            border-left: none !important;
+            padding: 0 !important;
+            margin: 0.5rem 0 0 0 !important;
+            background: transparent !important;
+            color: #334155 !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 1.1rem !important;
+            line-height: 1.6 !important;
+            border-radius: 0 !important;
+        }
+
+        .translated-evidence-header {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--emerald);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         /* Sahih — Authentic (Green) */
         .grade-sahih {
             color: var(--sahih-color);
@@ -448,24 +496,77 @@
             box-shadow: 0 2px 8px rgba(6, 95, 70, 0.08);
         }
 
-        /* ===== SCORE RING ===== */
-        .score-ring {
-            position: relative;
-            width: 72px;
-            height: 72px;
-        }
-
-        .score-ring svg {
-            transform: rotate(-90deg);
-        }
-
-        .score-ring .score-value {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
+        /* ===== CONSENSUS BADGE ===== */
+        .consensus-badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(6, 95, 70, 0.05), rgba(6, 95, 70, 0.1));
+            border: 1px solid rgba(6, 95, 70, 0.15);
+            border-radius: 999px;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .consensus-badge-majority {
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.05), rgba(29, 78, 216, 0.1));
+            border: 1px solid rgba(29, 78, 216, 0.15);
+        }
+
+        .consensus-badge-difference {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.05), rgba(217, 119, 6, 0.1));
+            border: 1px solid rgba(217, 119, 6, 0.15);
+        }
+
+        /* ===== CONSENSUS BUTTONS (Premium Overhaul) ===== */
+        m3e-button.consensus-btn {
+            --m3-button-label-text-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 32px !important;
+            --m3-button-container-height: 32px;
+            --m3-button-label-text-size: 0.65rem;
+            margin: 0;
+            padding: 0;
+            --m3-button-container-shape: 999px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        m3e-button.consensus-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        m3e-button.consensus-btn-agreed {
+            --m3-button-container-color: #065F46;
+            --m3-button-label-text-color: white;
+            --m3-button-icon-color: white;
+        }
+
+        m3e-button.consensus-btn-majority {
+            --m3-button-container-color: #1D4ED8;
+            --m3-button-label-text-color: white;
+            --m3-button-icon-color: white;
+        }
+
+        m3e-button.consensus-btn-difference {
+            --m3-button-container-color: #D97706;
+            --m3-button-label-text-color: white;
+            --m3-button-icon-color: white;
+        }
+
+        m3e-button.consensus-btn-hasan {
+            --m3-button-container-color: #059669;
+            /* Slightly lighter emerald */
+            --m3-button-label-text-color: white;
+            --m3-button-icon-color: white;
+        }
+
+        m3e-button.consensus-btn-weak {
+            --m3-button-container-color: #DC2626;
+            /* Red */
+            --m3-button-label-text-color: white;
+            --m3-button-icon-color: white;
         }
 
         /* ===== GRADE LEGEND ===== */
@@ -539,6 +640,85 @@
 <body class="min-h-screen flex flex-col relative">
     <m3e-theme color="#065F46" scheme="light" motion="expressive">
 
+        <!-- Consensus Explanation Dialogs -->
+        <m3e-dialog id="dlg-agreed" dismissible>
+            <span slot="header">Scholarly Consensus: Agreed Upon (متفق عليه)</span>
+            <div class="space-y-4">
+                <p class="text-gray-600 leading-relaxed">
+                    This indicates an undeniable scholarly consensus (Ijma') across the major schools of thought. There
+                    is no significant legitimate disagreement on this core answer.
+                </p>
+                <div class="p-3 bg-emerald/5 rounded-lg border border-emerald/10 text-xs text-emerald italic">
+                    "Hold fast to the rope of Allah all together and do not be divided." (3:103)
+                </div>
+            </div>
+            <div slot="actions" end>
+                <m3e-button variant="text"><m3e-dialog-action
+                        return-value="ok">Understood</m3e-dialog-action></m3e-button>
+            </div>
+        </m3e-dialog>
+
+        <m3e-dialog id="dlg-majority" dismissible>
+            <span slot="header">Scholarly Consensus: Majority Opinion (قول الجمهور)</span>
+            <div class="space-y-4">
+                <p class="text-gray-600 leading-relaxed">
+                    This represents the view held by the vast majority of classical scholars (The الجمهور). While other
+                    valid interpretations may exist, this is the most widely accepted and practiced position.
+                </p>
+            </div>
+            <div slot="actions" end>
+                <m3e-button variant="text"><m3e-dialog-action
+                        return-value="ok">Understood</m3e-dialog-action></m3e-button>
+            </div>
+        </m3e-dialog>
+
+        <m3e-dialog id="dlg-difference" dismissible>
+            <span slot="header">Scholarly Consensus: Valid Difference (اختلاف معتبر)</span>
+            <div class="space-y-4">
+                <p class="text-gray-600 leading-relaxed">
+                    This indicates that classical scholars have legitimate and respected differences of opinion on this
+                    matter. Both (or multiple) views are considered orthodox and valid within the framework of Usul
+                    al-Fiqh.
+                </p>
+            </div>
+            <div slot="actions" end>
+                <m3e-button variant="text"><m3e-dialog-action
+                        return-value="ok">Understood</m3e-dialog-action></m3e-button>
+            </div>
+        </m3e-dialog>
+
+        <m3e-dialog id="dlg-hasan" dismissible>
+            <span slot="header">Scholarly Consensus: Accepted/Hasan (حسن)</span>
+            <div class="space-y-4">
+                <p class="text-gray-600 leading-relaxed">
+                    This indicates the evidence is generally accepted and relied upon by scholars, though it may not
+                    reach the absolute highest level of authenticity (like Agreed Upon texts). It is a valid proof in
+                    Islamic law.
+                </p>
+            </div>
+            <div slot="actions" end>
+                <m3e-button variant="text"><m3e-dialog-action
+                        return-value="ok">Understood</m3e-dialog-action></m3e-button>
+            </div>
+        </m3e-dialog>
+
+        <m3e-dialog id="dlg-weak" dismissible>
+            <span slot="header">Scholarly Consensus: Weak/Fabricated Warning (ضعيف / موضوع)</span>
+            <div class="space-y-4">
+                <p class="text-red-700 font-bold leading-relaxed bg-red-50 p-3 rounded border border-red-200">
+                    Warning: The sources for this matter fall into the weak (Da'if) or fabricated (Mawdu') categories.
+                </p>
+                <p class="text-gray-600 leading-relaxed">
+                    Classical scholars have determined that the chains of transmission or texts for this are unreliable.
+                    Such evidence cannot be used to establish Islamic rulings.
+                </p>
+            </div>
+            <div slot="actions" end>
+                <m3e-button variant="text"><m3e-dialog-action
+                        return-value="ok">Understood</m3e-dialog-action></m3e-button>
+            </div>
+        </m3e-dialog>
+
         <!-- HEADER -->
         <header class="p-6 border-b border-black/5 bg-white/50 backdrop-blur-sm sticky top-0 z-20">
             <div class="max-w-4xl mx-auto flex justify-between items-center">
@@ -604,12 +784,12 @@
                     </div>
 
                     <div class="flex flex-col items-center gap-2 border-t border-gray-100 pt-4 w-full">
-                        <span class="text-xs text-gray-400 font-medium tracking-wider uppercase">Amanah Score</span>
+                        <span class="text-xs text-gray-400 font-medium tracking-wider uppercase">Consensus (Ijma')
+                            Indicator</span>
                         <p class="text-xs text-gray-500 text-center leading-relaxed">
-                            While <strong class="text-gray-700">Grading</strong> is the historical authenticity of the
-                            underlying text (e.g. Sahih), the <strong class="text-gray-700">Amanah Score</strong>
-                            (0-100) is the AI's real-time confidence that its generated English answer is accurate and
-                            strictly supported by these classical sources without fabrication.
+                            A badge in the top right corner indicates the level of scholarly consensus on the answer
+                            provided, ranging from <strong class="text-emerald">Agreed Upon</strong> (undeniable
+                            consensus) to <strong class="text-daif">Valid Difference</strong> (valid competing views).
                         </p>
                     </div>
 
@@ -821,6 +1001,27 @@
             }
 
             // ===== RENDER SOURCE CARDS =====
+            // ===== PROCESS ARABIC TEXT =====
+            function processArabicText(text) {
+                if (!text) return '';
+                let html = String(text);
+
+                // Regex to match "صلى الله عليه وسلم" with ANY combination of vowels/tashkeel (\u064B-\u065F)
+                const sawRegex = /ص[\u064B-\u065F]*ل[\u064B-\u065F]*[ىي][\u064B-\u065F]*\s+ا[\u064B-\u065F]*ل[\u064B-\u065F]*ل[\u064B-\u065F]*ه[\u064B-\u065F]*\s+ع[\u064B-\u065F]*ل[\u064B-\u065F]*ي[\u064B-\u065F]*ه[\u064B-\u065F]*\s+و[\u064B-\u065F]*س[\u064B-\u065F]*ل[\u064B-\u065F]*م[\u064B-\u065F]*/g;
+
+                // Replace fully spelled out variants and the literal \uFDFA character with the clean inline version
+                html = html.replace(sawRegex, '<span class="arabic-inline" dir="rtl">صلى الله عليه وسلم</span>');
+                html = html.replace(/\uFDFA/g, '<span class="arabic-inline" dir="rtl">صلى الله عليه وسلم</span>');
+
+                // Wrap general Arabic sequences in font-arabic dir=rtl. Exclude the SAW ligature \uFDFA
+                html = html.replace(
+                    /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDF9\uFDFB-\uFDFF\uFE70-\uFEFF]+(?:[^a-zA-Z\n<]*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDF9\uFDFB-\uFDFF\uFE70-\uFEFF]+)*)/g,
+                    '<span class="font-arabic" dir="rtl">$1</span>'
+                );
+
+                return html;
+            }
+
             function renderSources(sources, containerElement) {
                 containerElement.innerHTML = '';
 
@@ -848,7 +1049,8 @@
                             ${gradeInfo.label}
                         </span>
                     </div>
-                    ${snippet ? `<p class="font-arabic text-sm text-gray-500 leading-relaxed line-clamp-2" dir="rtl">${escapeHtml(snippet)}</p>` : ''}
+                    ${snippet ? `<p class="text-sm text-gray-500 leading-relaxed" dir="auto">${processArabicText(escapeHtml(snippet))}</p>` : ''}
+                    ${src.translation_snippet ? `<p class="text-xs text-gray-400 mt-1 italic" dir="auto">"${processArabicText(escapeHtml(src.translation_snippet))}"</p>` : ''}
                     <div class="mt-1">
                         <span class="text-[0.65rem] text-gray-400 italic">${gradeInfo.description}</span>
                     </div>
@@ -889,8 +1091,8 @@
             // ===== RENDER ARABIC TEXT =====
             function renderArabicText(text) {
                 if (!text) return 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-                // Clean up and ensure proper display
-                return text.trim();
+                // Strip internal markers from view
+                return text.replace(/\[\[.*?\]\]/g, '').trim();
             }
 
             // ===== RENDER ANSWER WITH MARKDOWN =====
@@ -905,13 +1107,7 @@
                 let html = marked.parse(processed);
 
                 // Post-process: detect Arabic text within the HTML and wrap with proper styling
-                // This regex detects sequences of Arabic characters
-                html = html.replace(
-                    /([\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF][^\n<]*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF])/g,
-                    '<span class="font-arabic arabic-inline" dir="rtl">$1</span>'
-                );
-
-                return html;
+                return processArabicText(html);
             }
 
             // ===== HTML ESCAPE =====
@@ -932,13 +1128,57 @@
                 }
 
                 card.innerHTML = `
-                    <!-- Verification Stamp -->
-                    ${(assistantResponse.amanah_score !== undefined && assistantResponse.amanah_score >= 85) ? `
-                    <div class="absolute top-6 right-6 opacity-20 rotate-6 pointer-events-none">
-                        <div class="w-24 h-24 rounded-full border-4 border-emerald flex items-center justify-center">
-                            <span class="text-emerald font-bold text-xs tracking-widest text-center">VERIFIED</span>
-                        </div>
-                    </div>` : ''}
+                    <!-- Consensus Indicator (Replaces Amanah Score) -->
+                    ${(assistantResponse.consensus_level && assistantResponse.consensus_level !== 'unknown') ? `
+                    <div class="absolute top-6 right-6 pointer-events-auto">
+                        ${assistantResponse.consensus_level === 'agreed_upon' ? `
+                            <m3e-button variant="filled" shape="rounded" class="consensus-btn consensus-btn-agreed">
+                                <m3e-icon name="verified" slot="icon"></m3e-icon>
+                                <m3e-dialog-trigger for="dlg-agreed"></m3e-dialog-trigger>
+                                <span class="flex items-center gap-2 font-bold tracking-wider leading-none">
+                                    AGREED UPON
+                                    <span class="font-arabic text-xs font-normal opacity-80" dir="rtl">متفق عليه</span>
+                                </span>
+                            </m3e-button>
+                        ` : assistantResponse.consensus_level === 'majority' ? `
+                            <m3e-button variant="filled" shape="rounded" class="consensus-btn consensus-btn-majority">
+                                <m3e-icon name="groups" slot="icon"></m3e-icon>
+                                <m3e-dialog-trigger for="dlg-majority"></m3e-dialog-trigger>
+                                <span class="flex items-center gap-2 font-bold tracking-wider leading-none">
+                                    MAJORITY OPINION
+                                    <span class="font-arabic text-xs font-normal opacity-80" dir="rtl">قول الجمهور</span>
+                                </span>
+                            </m3e-button>
+                        ` : assistantResponse.consensus_level === 'khilaf' ? `
+                            <m3e-button variant="filled" shape="rounded" class="consensus-btn consensus-btn-difference">
+                                <m3e-icon name="balance" slot="icon"></m3e-icon>
+                                <m3e-dialog-trigger for="dlg-difference"></m3e-dialog-trigger>
+                                <span class="flex items-center gap-2 font-bold tracking-wider leading-none">
+                                    VALID DIFFERENCE
+                                    <span class="font-arabic text-xs font-normal opacity-80" dir="rtl">اختلاف معتبر</span>
+                                </span>
+                            </m3e-button>
+                        ` : assistantResponse.consensus_level === 'hasan_acceptable' ? `
+                            <m3e-button variant="filled" shape="rounded" class="consensus-btn consensus-btn-hasan">
+                                <m3e-icon name="done_all" slot="icon"></m3e-icon>
+                                <m3e-dialog-trigger for="dlg-hasan"></m3e-dialog-trigger>
+                                <span class="flex items-center gap-2 font-bold tracking-wider leading-none">
+                                    ACCEPTED / HASAN
+                                    <span class="font-arabic text-xs font-normal opacity-80" dir="rtl">حسن</span>
+                                </span>
+                            </m3e-button>
+                        ` : `
+                            <m3e-button variant="filled" shape="rounded" class="consensus-btn consensus-btn-weak">
+                                <m3e-icon name="warning" slot="icon"></m3e-icon>
+                                <m3e-dialog-trigger for="dlg-weak"></m3e-dialog-trigger>
+                                <span class="flex items-center gap-2 font-bold tracking-wider leading-none">
+                                    WEAK / FABRICATED
+                                    <span class="font-arabic text-xs font-normal opacity-80" dir="rtl">ضعيف / موضوع</span>
+                                </span>
+                            </m3e-button>
+                        `}
+                    </div>
+` : ''}
 
                     <!-- User Question Section -->
                     <div class="mb-8 border-b border-gray-100 pb-6">
@@ -959,7 +1199,32 @@
 
                     <!-- Answer Section (Rendered Markdown) -->
                     <div class="answer-content">
-                        ${renderAnswer(assistantResponse.content)}
+                        ${(() => {
+                        const content = assistantResponse.content || '';
+                        // Try to extract Translated Evidence section
+                        const parts = content.split(/## Evidence Translation/i);
+
+                        if (parts.length > 1) {
+                            // We have a translation section
+                            const beforeTrans = parts[0];
+                            const afterTrans = parts[1].split(/## [A-Za-z ]+/i);
+                            const transContent = afterTrans[0];
+                            const remaining = content.replace(/## Evidence Translation[\s\S]*?(?=## [A-Za-z ]+|$)/i, '');
+
+                            return `
+                                    <div class="translated-evidence-box">
+                                        <div class="translated-evidence-header">
+                                            <m3e-icon name="translate" size="16"></m3e-icon>
+                                            Evidence Translation
+                                        </div>
+                                        ${renderAnswer('> ' + transContent.trim().replace(/^> /, ''))}
+                                    </div>
+                                    ${renderAnswer(remaining.replace(/## Evidence\n[\s\S]*?(?=\n\n|$)/i, ''))}
+                                `;
+                        }
+
+                        return renderAnswer(content);
+                    })()}
                     </div>
 
                     <!-- Source Cards Section -->
@@ -986,15 +1251,8 @@
                                 <span class="font-bold text-emerald text-sm block">${srcText}</span>
                             </div>
 
-                            <!-- Amanah Score Ring -->
+                            <!-- Placeholder for alignment (Amanah Score Ring removed) -->
                             <div class="flex items-center gap-4">
-                                <m3e-circular-progress-indicator variant="wavy" class="score-ring-element" max="100" value="0"
-                                    style="--m3e-circular-wavy-progress-indicator-diameter: 72px; --m3e-circular-progress-indicator-thickness: 4px; --m3e-progress-indicator-color: var(--accent); --m3e-circular-wavy-progress-indicator-amplitude: 1px;">
-                                    <div class="flex flex-col items-center justify-center -mt-1">
-                                        <span class="text-lg font-bold text-emerald score-number-element">0</span>
-                                        <span class="text-[0.55rem] text-gray-400 font-medium -mt-1">AMANAH</span>
-                                    </div>
-                                </m3e-circular-progress-indicator>
                             </div>
                         </div>
 
@@ -1013,6 +1271,11 @@
                                 <p class="font-arabic text-sm text-gray-600 leading-relaxed" dir="rtl">
                                     ${escapeHtml(assistantResponse.verification_notes || '')}
                                 </p>
+                                ${assistantResponse.verification_notes_translation ? `
+                                <p class="text-xs text-gray-400 mt-2 italic leading-relaxed">
+                                    "${escapeHtml(assistantResponse.verification_notes_translation)}"
+                                </p>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -1024,12 +1287,7 @@
                     renderSources(assistantResponse.sources, sourcesListContainer);
                 }
 
-                // Animate score ring
-                const scoreRingElement = card.querySelector('.score-ring-element');
-                const scoreNumberElement = card.querySelector('.score-number-element');
-                if (scoreRingElement && scoreNumberElement) {
-                    animateScore(assistantResponse.amanah_score, scoreRingElement, scoreNumberElement);
-                }
+                // Amanah score animation removed as the UI element was replaced with Consensus badges
 
                 return card;
             }
@@ -1084,10 +1342,10 @@
                     }
                     const data = await resp.json();
 
-                    // Enforce Amanah Score Threshold
+                    // Enforce Amanah Score Threshold (Faithfulness check)
                     const score = data.amanah_score !== undefined ? data.amanah_score : 100;
 
-                    if (data.is_fallback || score < 85) {
+                    if (data.is_fallback) {
                         const fallbackText = data.answer || "I could not find a verified answer with high confidence in the sources.";
 
                         if (isFollowUp) {
@@ -1133,8 +1391,10 @@
                         arabic_query: data.arabic_query,
                         arabic_draft: data.arabic_draft,
                         amanah_score: score,
+                        consensus_level: data.consensus_level || 'unknown',
                         sources: data.sources || [],
-                        verification_notes: data.verification_notes
+                        verification_notes: data.verification_notes,
+                        verification_notes_translation: data.verification_notes_translation
                     });
 
                     // Direct answering: Re-render the thread with full cards

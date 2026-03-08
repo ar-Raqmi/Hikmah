@@ -68,7 +68,7 @@ class VectorizeClient:
                 {
                     "id": m.get("id", ""),
                     "score": m.get("score", 0.0),
-                    **(m.get("metadata", {})),
+                    "metadata": m.get("metadata", {}),
                 }
                 for m in matches
             ]
